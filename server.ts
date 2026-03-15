@@ -1,0 +1,243 @@
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import { createServer as createViteServer } from 'vite';
+import path from 'path';
+import { TOKEN_SETS, NEXTDNS_KEY } from './src/server/tokens';
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());
+
+const HEADERS: Record<string, string> = {
+    'Host': 'api.revenuecat.com',
+    'Authorization': 'Bearer appl_JngFETzdodyLmCREOlwTUtXdQik',
+    'Content-Type': 'application/json',
+    'Accept': '*/*',
+    'X-Platform': 'iOS',
+    'X-Platform-Version': 'Version 26.2 (Build 23C55)',
+    'X-Platform-Device': 'iPhone15,3',
+    'X-Platform-Flavor': 'native',
+    'X-Version': '5.41.0',
+    'X-Client-Version': '2.32.2',
+    'X-Client-Bundle-ID': 'com.locket.Locket',
+    'X-Client-Build-Version': '3',
+    'X-StoreKit2-Enabled': 'true',
+    'X-StoreKit-Version': '2',
+    'X-Observer-Mode-Enabled': 'false',
+    'X-Storefront': 'VNM',
+    'X-Apple-Device-Identifier': '39A73C25-1E05-4350-ADA7-5CD3FE1079E8',
+    'X-Preferred-Locales': 'vi_KR,ko_KR,en_KR',
+    'X-Nonce': 'w0Mlb6+AmV4WYuVv',
+    'X-Is-Backgrounded': 'false',
+    'X-Retry-Count': '0',
+    'X-Is-Debug-Build': 'false',
+    'User-Agent': 'Locket/3 CFNetwork/3860.300.31 Darwin/25.2.0',
+    'Accept-Language': 'vi-VN,vi;q=0.9',
+    'Connection': 'keep-alive',
+    'Pragma': 'no-cache',
+    'Cache-Control': 'no-cache',
+    'X-RevenueCat-ETag': ''
+};
+
+// --- API Routes ---
+
+app.post('/api/resolve', async (req, res) => {
+    const { username } = req.body;
+    if (!username) return res.status(400).json({ error: 'Username is required' });
+
+    try {
+        const url = `https://locket.cam/${username}`;
+        const response = await axios.get(url, {
+            headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)", "Accept": "text/html" },
+            maxRedirects: 5
+        });
+
+        const html = response.data;
+        const redirectUrl = response.request.res.responseUrl || url;
+
+        const extract = (text: string) => {
+            if (!text) return null;
+            const m = text.match(/\/invites\/([A-Za-z0-9]{28})/);
+            if (m) return m[1];
+            const lp = text.match(/link=([^\s"'>]+)/);
+            if (lp) {
+                try {
+                    const d = lp[1].replace(/%3A/g, ':').replace(/%2F/g, '/');
+                    const dm = d.match(/\/invites\/([A-Za-z0-9]{28})/);
+                    if (dm) return dm[1];
+                } catch (e) {}
+            }
+            return null;
+        };
+
+        const uid = extract(redirectUrl) || extract(html);
+        if (uid) {
+            res.json({ uid });
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (error) {
+        console.error("Resolve error:", error);
+        res.status(500).json({ error: 'Failed to resolve UID' });
+    }
+});
+
+app.get('/api/status/:uid', async (req, res) => {
+    const { uid } = req.params;
+    try {
+        const url = `https://api.revenuecat.com/v1/subscribers/${uid}`;
+        const response = await axios.get(url, { headers: HEADERS });
+        
+        if (response.status >= 200 && response.status < 300) {
+            const entitlements = response.data?.subscriber?.entitlements?.Gold;
+            if (entitlements) {
+                return res.json({ active: true, expires: entitlements.expires_date });
+            }
+        }
+        res.json({ active: false });
+    } catch (error) {
+        console.error("Status check error:", error);
+        res.status(500).json({ error: 'Failed to check status' });
+    }
+});
+
+app.post('/api/activate', async (req, res) => {
+    const { uid } = req.body;
+    if (!uid) return res.status(400).json({ error: 'UID is required' });
+
+    try {
+        // 1. Inject Gold
+        const token_config = TOKEN_SETS[Math.floor(Math.random() * TOKEN_SETS.length)];
+        const url = "https://api.revenuecat.com/v1/receipts";
+        const body = {
+            "product_id": "locket_199_1m", 
+            "fetch_token": token_config['fetch_token'], 
+            "app_transaction": token_config['app_transaction'], 
+            "app_user_id": uid, 
+            "is_restore": true, 
+            "store_country": "VNM", 
+            "currency": "USD",
+            "price": "1.99", 
+            "normal_duration": "P1M", 
+            "subscription_group_id": "21419447",
+            "observer_mode": false, 
+            "initiation_source": "restore", 
+            "offers": [],
+            "attributes": {"$attConsentStatus": {"updated_at_ms": Date.now(), "value": "notDetermined"}}
+        };
+
+        const current_headers = { ...HEADERS };
+        current_headers['Content-Length'] = JSON.stringify(body).length.toString();
+        if (token_config['hash_params']) current_headers['X-Post-Params-Hash'] = token_config['hash_params'];
+        if (token_config['hash_headers']) current_headers['X-Headers-Hash'] = token_config['hash_headers'];
+        current_headers['X-Is-Sandbox'] = token_config['is_sandbox'].toString();
+
+        let success = false;
+        let msgResult = "Failed";
+
+        for (let attempt = 0; attempt < 5; attempt++) {
+            try {
+                const response = await axios.post(url, body, { headers: current_headers, validateStatus: () => true });
+                if (response.status === 200) {
+                    // Check status
+                    const statusRes = await axios.get(`https://api.revenuecat.com/v1/subscribers/${uid}`, { headers: HEADERS });
+                    if (statusRes.data?.subscriber?.entitlements?.Gold) {
+                        success = true;
+                        msgResult = "SUCCESS";
+                        break;
+                    }
+                    await new Promise(r => setTimeout(r, 2000));
+                    const statusRes2 = await axios.get(`https://api.revenuecat.com/v1/subscribers/${uid}`, { headers: HEADERS });
+                    if (statusRes2.data?.subscriber?.entitlements?.Gold) {
+                        success = true;
+                        msgResult = "SUCCESS";
+                        break;
+                    }
+                    msgResult = "Accepted but NO Gold (Expired?)";
+                    break;
+                } else if (response.status === 529) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    continue;
+                } else {
+                    msgResult = `Rejected: ${response.data?.message || response.status}`;
+                    break;
+                }
+            } catch (e: any) {
+                if (attempt === 4) msgResult = `Request Error: ${e.message}`;
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+
+        if (!success) {
+            return res.status(400).json({ error: msgResult });
+        }
+
+        // 2. Create NextDNS Profile
+        const dnsHeaders = { "X-Api-Key": NEXTDNS_KEY, "Content-Type": "application/json" };
+        const todayStr = new Date().toISOString().split('T')[0];
+        const profileName = `LocketVIP-${todayStr}`;
+        
+        let pid = null;
+        let link = null;
+
+        try {
+            const profilesRes = await axios.get("https://api.nextdns.io/profiles", { headers: dnsHeaders, validateStatus: () => true });
+            if (profilesRes.status === 200) {
+                const existing = profilesRes.data?.data?.find((p: any) => p.name === profileName);
+                if (existing) {
+                    pid = existing.id;
+                    link = `https://apple.nextdns.io/?profile=${pid}`;
+                    try {
+                        await axios.post(`https://api.nextdns.io/profiles/${pid}/denylist`, { id: "revenuecat.com", active: true }, { headers: dnsHeaders });
+                    } catch (e) {}
+                }
+            }
+
+            if (!pid) {
+                const createRes = await axios.post("https://api.nextdns.io/profiles", { name: profileName }, { headers: dnsHeaders, validateStatus: () => true });
+                if (createRes.status === 200) {
+                    pid = createRes.data?.data?.id;
+                    link = `https://apple.nextdns.io/?profile=${pid}`;
+                    try {
+                        await axios.post(`https://api.nextdns.io/profiles/${pid}/denylist`, { id: "revenuecat.com", active: true }, { headers: dnsHeaders });
+                    } catch (e) {}
+                }
+            }
+        } catch (e) {
+            console.error("NextDNS error:", e);
+        }
+
+        res.json({ success: true, pid, link });
+
+    } catch (error) {
+        console.error("Activate error:", error);
+        res.status(500).json({ error: 'Failed to activate' });
+    }
+});
+
+// --- Vite Middleware ---
+async function startServer() {
+    if (process.env.NODE_ENV !== "production") {
+        const vite = await createViteServer({
+            server: { middlewareMode: true },
+            appType: "spa",
+        });
+        app.use(vite.middlewares);
+    } else {
+        const distPath = path.join(process.cwd(), 'dist');
+        app.use(express.static(distPath));
+        app.get('*all', (req, res) => {
+            res.sendFile(path.join(distPath, 'index.html'));
+        });
+    }
+
+    app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+
+startServer();

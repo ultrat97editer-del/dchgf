@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>PayloadDisplayName</key>
+    <string>NextDNS - LocketGold</string>
+      <key>PayloadDescription</key>
+    <string>Locketgold.top - NextDNS
+- Cấu hình này sử dụng NextDNS để giữ locket gold không mất.
+- Loại bỏ việc bị theo dõi bởi các trang web.
+- Chặn thu thập thông tin người dùng.
+- Không hao pin vì dữ liệu chỉ chạy qua DNS này thay vì hệ thống.
+Support: T97 | Config by: T97system | Locket.io.vn
+    </string>
+    <key>PayloadIdentifier</key>
+    <string>io.nextdns.678bdd.profile</string>
+    <key>PayloadScope</key>
+    <string>System</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>A1E2F262-DB73-40F6-BD22-2E42A43A3C94.678bdd</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadContent</key>
+    <array>
+      <dict>
+        <key>DNSSettings</key>
+        <dict>
+          <key>DNSProtocol</key>
+          <string>HTTPS</string>
+          <key>ServerURL</key>
+          <string>https://apple.dns.nextdns.io/678bdd//Apple%20iPhone15%2C5</string>
+          <key>ServerAddresses</key>
+          <array>
+            <string>45.90.28.0</string>
+            <string>2a07:a8c0::</string>
+            <string>45.90.30.0</string>
+            <string>2a07:a8c1::</string>
+          </array>
+        </dict>
+        <key>OnDemandRules</key>
+        <array>
+          <dict>
+            <key>Action</key>
+            <string>EvaluateConnection</string>
+            <key>ActionParameters</key>
+            <array>
+              <dict>
+                <key>DomainAction</key>
+                <string>NeverConnect</string>
+                <key>Domains</key>
+                <array>
+                  <string>captive.apple.com</string>
+                  <string>3gppnetwork.org</string>
+                  <string>dav.orange.fr</string>
+                  <string>vvm.mobistar.be</string>
+                  <string>vvm.mstore.msg.t-mobile.com</string>
+                  <string>tma.vvm.mone.pan-net.eu</string>
+                  <string>vvm.ee.co.uk</string>
+                </array>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>Action</key>
+            <string>Connect</string>
+          </dict>
+        </array>
+        <key>PayloadType</key>
+        <string>com.apple.dnsSettings.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>io.nextdns.678bdd.profile.dnsSettings.managed</string>
+        <key>PayloadUUID</key>
+        <string>A1E2F262-DB73-40F6-BD22-2E42A43A3C94.678bdd.dnsSettings.managed</string>
+        <key>PayloadDisplayName</key>
+        <string>NextDNS - LocketGold</string>
+        <key>PayloadOrganization</key>
+        <string>NextDNS</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+      </dict>
+      <dict>
+        <key>PayloadContent</key>
+        <data>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZMakNDQXhhZ0F3SUJBZ0lRYWxYREhSVnZ3K2Q2bERDOHU4MFhNVEFOQmdrcWhraUc5dzBCQVFzRkFEQXgKTVJVd0V3WURWUVFLRXd4T1pYaDBSRTVUSUVsdVl5NHhHREFXQmdOVkJBTVREMDVsZUhSRVRsTWdVbTl2ZENCRApRVEFlRncweU1EQXhNREV3TURBd01EQmFGdzAwTURBeE1ERXdNREF3TURCYU1ERXhGVEFUQmdOVkJBb1RERTVsCmVIUkVUbE1nU1c1akxqRVlNQllHQTFVRUF4TVBUbVY0ZEVST1V5QlNiMjkwSUVOQk1JSUNJakFOQmdrcWhraUcKOXcwQkFRRUZBQU9DQWc4QU1JSUNDZ0tDQWdFQS9YeG9sQlRMWmxLNzcyM3VmaGIzOVJIbzhlNElpWG9odlZ0VAp1Y1V4RWhIS3p4aG5leEtNT0hEYkZvQm5pR091ZXBGb0liSEFQODZwRVJYVVEyR2F0TmZ0QW5DWnArV0FJbG1vCkhSZ3dWTTkzQWhFdXM1NFlJclphNU1aSmR1MUJMV3hhblJ6Q3pDTHkrajNhNkxkYTNmcE1zSXJCMkRGSTF1dXAKZlJyZTRGQ1hHaUVqSjdTZzBwc3RlY0grN1JZR3I1bEZoc2wxbjdSWlExcUtPazBqWTNoNlV0R3l1am9kejlQWApIdEc2QUEzR3BBbE5PQXNlSUh3aHp3VmhZSmxWeXNHOG9MT3kyd3E0R0Vub21VL2wvOUIxU0MyNDgxNUxBVit1CnlHTGN5WWRYTzNRbkswYm9yejQ2aEdnNTMySENWWFo4STNhemlvYVZzK3o1R2lGS2E3dFBIM3MyWTRkbzg0NmkKMUhyOGFUWHJDQ2NHS2d1RHFIYmxSc0ErbHNwN3FabGRiQm14NjVVSmpUdjNxbTRBSDJrdEFYNE9xei9oSDkyZgpxa29sK0NXZ3RreFROYk9TdjlZcHUrd1JrUkZDaWlLNndCajFmUXVsa1p5MkUwM1JZdUd5d3g1MzMxMkwwbVBSCmdScERsNks0bmtYWitJZmtKS3hWdkhUZzZrRDl5WHk4SDd6Qk5mTFlWaE9EeWRGcFNaQU5qN3FFL1VRN3NXblIKQm9YM0VFQTJTejlYNjRMZkNOU01lMzlneGpSMmw5dHN5ODRMSXdpbXlFV0Y1d2grYW1scFMwTlVKcUhWNGE3RApheW1CaEZMNkxkcnVEWGh1b0s3MnJVYWxWREEweElyWVBBNVFBNm85eFpwTjNzaGZCMmZiUWZma3liRitXQ2VVCkVIZEUxc2tDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnRUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHcKSFFZRFZSME9CQllFRkhYMHdiOGRleGgybGR2UWdFVFFlcmI4ZlFDdk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQwpBUUJJYmZ1MlRMZytDc3NIbWM3MEVBNHFZbFYxamhzSmVJZ3pxbHEwVGZoSWx1cFVzQUQvS1FIbm0xYkhxZXhNClFhQUJDQWR5MXU1OU1WZVlJeFhRSTRiSWFRcVpYVG52Z1BkQi85RkF6TUlPMERaRXpYTFBWc29XcS9qblNVSGQKdjNSS3R0SmtlMDAyQ21meWpYUyttVmpWWUF3Z0NzL1BsaWR3ZjVqR0g2dFljM0wvVXZOSW9xNERTb0NlMC93OAoxMjA5VEI1aWpXZnhpTDdKYlgrSjBIbnZ4UFJLMUVzdjhoendhUHhiYUFGU09sRG5XQWF6TWwrMjhBaGZBMXFrClp5YlFJdkpnL1ZqWXpMQ0JvREx3YjFUcFllaE84ZEZVM2NLV2p3cUttU042c2lLZEhMUVdwem9lbWJ5RndhSkYKNWZyY1dlTlVkNGk4MnlSeWtaTUVydlVSWVJ2NjZqUVNpRjdtNlNFNVV6eG1vbnh2NnNyYjZGZTBqTlNQempucgphRlRER2FLbDhmQnRyU1MxNysrSFVicitQVGV0UVRYclpFNWVNb1NzelpUbm5SUEJvTkx0ZE91YXcwVFBjYXdiCk9pZWVTZ0s5VnVPbi9mTHFSRHBZOGM2SzJneXoyTVVxMkc1SjkzWldwYmpNQWQ1ZjRZWUhJbENwa3BxaENCaEsKOStvN3ZrL3NlSGQ4RjFZcnNPTGxtQ2dRMW41dUlkZEhXa1lPaEJZTi9ZOGdyNngxampCR1BRbkQ4MURudFZMWQoxUDBmNGlBbjQzUkFPUFJMSjEvUTFlVWxaY2JkMXZKNlRCY0R2RE9mT0pWNnNZNm1jdTFVajBnSWx6bTJZOFVpCmk0WlBYUnB5RmlkVnNXeEYyc2tGNzFaUFZ3WFUvK1NNVEphZkh2S1k5S1U4a0E9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==</data>
+        <key>PayloadType</key>
+        <string>com.apple.security.root</string>
+        <key>PayloadIdentifier</key>
+        <string>io.nextdns.profile.security.root</string>
+        <key>PayloadUUID</key>
+        <string>CA12F263-DB74-40F7-BD22-2E42A43A3123</string>
+        <key>PayloadDisplayName</key>
+        <string>NextDNS - LocketGold Root CA</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+      </dict>
+    </array>
+  </dict>
+</plist>

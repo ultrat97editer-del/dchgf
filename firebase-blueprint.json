@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Stores transaction details for Locket Gold activation",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "The Locket username"
+        },
+        "purchaseDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of the purchase"
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "The unique transaction ID"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount paid"
+        }
+      },
+      "required": ["username", "purchaseDate", "transactionId"]
+    }
+  },
+  "firestore": {
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Collection of all invoices"
+    }
+  }
+}
