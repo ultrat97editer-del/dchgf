@@ -794,15 +794,17 @@ export default function App() {
                       <Maximize size={16} />
                     </button>
                   </div>
+                  
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 flex-1 text-xs shadow-inner flex justify-center items-center min-h-[300px]">
-  <video width="100%" height="auto" controls className="rounded-lg shadow-lg">
-    <source src="/video/huongdan.mp4" type="video/mp4" />
-    Trình duyệt của bạn không hỗ trợ thẻ video.
-  </video>
+                    <video width="100%" height="auto" controls className="rounded-lg shadow-lg">
+                      <source src="/video/huongdan.mp4" type="video/mp4" />
+                      Trình duyệt của bạn không hỗ trợ thẻ video.
+                    </video>
+                  </div>
                 </div>
-                    </div>
-                         </div>
-                               )}
+              </div>
+            </div>
+          )}
 
           {activeTab === 'security' && (
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
