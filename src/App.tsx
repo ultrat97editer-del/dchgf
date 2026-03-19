@@ -922,10 +922,6 @@ export default function App() {
                         <p className="text-sm font-bold text-gray-800">t97system@icloud.com</p>
                       </div>
                       <div className="bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex-1 min-w-[200px]">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Zalo</p>
-                        <a href="https://zalo.me/0338141911" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-gray-800 hover:text-blue-600 transition-colors">0338141911</a>
-                      </div>
-                      <div className="bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex-1 min-w-[200px]">
                         <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Telegram</p>
                         <a href="https://t.me/T97system" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-gray-800 hover:text-blue-600 transition-colors">@T97system</a>
                       </div>
@@ -1028,10 +1024,6 @@ export default function App() {
                       <div className="bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex-1 min-w-[200px]">
                         <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Email</p>
                         <p className="text-sm font-bold text-gray-800">t97system@icloud.com</p>
-                      </div>
-                      <div className="bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex-1 min-w-[200px]">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Zalo</p>
-                        <a href="https://zalo.me/0338141911" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-gray-800 hover:text-blue-600 transition-colors">0338141911</a>
                       </div>
                       <div className="bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex-1 min-w-[200px]">
                         <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Telegram</p>
@@ -1203,10 +1195,6 @@ export default function App() {
                         <p className="text-lg font-bold text-gray-800">t97system@icloud.com</p>
                       </div>
                       <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Zalo</p>
-                        <a href="https://zalo.me/0338141911" target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-gray-800 hover:text-blue-600 transition-colors">0338141911</a>
-                      </div>
-                      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Telegram</p>
                         <a href="https://t.me/T97system" target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-gray-800 hover:text-blue-600 transition-colors">@T97system</a>
                       </div>
@@ -1286,16 +1274,6 @@ export default function App() {
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-500 text-center">Chọn kênh hỗ trợ bên dưới 👇</p>
-            <a href="https://zalo.me/0338141911" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition group">
-              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">Zalo</span>
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm text-gray-800">Chat Zalo</p>
-                <p className="text-xs text-gray-400">Phản hồi trong 5 phút</p>
-              </div>
-              <ArrowRight size={16} className="text-gray-300 group-hover:text-blue-500 transition" />
-            </a>
             <a href="https://t.me/T97system" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-sky-50 hover:bg-sky-100 rounded-xl transition group">
               <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-sm">Tele</span>
