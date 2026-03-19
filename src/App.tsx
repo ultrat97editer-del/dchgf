@@ -1198,6 +1198,10 @@ export default function App() {
                         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Telegram</p>
                         <a href="https://t.me/T97system" target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-gray-800 hover:text-blue-600 transition-colors">@T97system</a>
                       </div>
+                      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Zalo hỗ trợ</p>
+                        <a href="https://zalo.me/g/lqkybd852" target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-gray-800 hover:text-blue-600 transition-colors">Nhóm Zalo hỗ trợ</a>
+                      </div>
                     </div>
                   </div>
 
@@ -1283,6 +1287,16 @@ export default function App() {
                 <p className="text-xs text-gray-400">@T97system</p>
               </div>
               <ArrowRight size={16} className="text-gray-300 group-hover:text-sky-500 transition" />
+            </a>
+            <a href="https://zalo.me/g/lqkybd852" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition group">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm">Zalo</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-sm text-gray-800">Nhóm Zalo</p>
+                <p className="text-xs text-gray-400">Hỗ trợ 24/7</p>
+              </div>
+              <ArrowRight size={16} className="text-gray-300 group-hover:text-blue-600 transition" />
             </a>
           </div>
         </div>
