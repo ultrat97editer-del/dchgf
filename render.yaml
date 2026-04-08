@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: locket-activator
+    runtime: node
+    plan: free
+    buildCommand: bash render-build.sh
+    startCommand: node server.obfuscated.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000

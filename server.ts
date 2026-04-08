@@ -229,8 +229,8 @@ async function startServer() {
         app.use(vite.middlewares);
     } else {
         const distPath = path.join(process.cwd(), 'dist');
-        app.use(express.static(distPath));
-        app.get('*all', (req, res) => {
+        app.use(express.static(distPath, { maxAge: '1h' }));
+        app.get('*', (req, res) => {
             res.sendFile(path.join(distPath, 'index.html'));
         });
     }

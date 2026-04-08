@@ -24,7 +24,10 @@ export default function App() {
   const [invoiceSearchUsername, setInvoiceSearchUsername] = useState('');
   const [showAddInvoiceModal, setShowAddInvoiceModal] = useState(false);
   const [newInvoiceData, setNewInvoiceData] = useState({ username: '', transactionId: '', amount: '10000' });
-  const BACKEND_URL = "https://backend-locket.vercel.app";
+  
+  // Use environment variable or default to relative URL for Render
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 
+    (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://backend-locket.vercel.app');
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminModal, setShowAdminModal] = useState(false);
