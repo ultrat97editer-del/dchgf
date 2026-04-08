@@ -230,7 +230,8 @@ async function startServer() {
     } else {
         const distPath = path.join(process.cwd(), 'dist');
         app.use(express.static(distPath, { maxAge: '1h' }));
-        app.get('*', (req, res) => {
+        // Fallback to index.html for SPA routing
+        app.use((req, res) => {
             res.sendFile(path.join(distPath, 'index.html'));
         });
     }

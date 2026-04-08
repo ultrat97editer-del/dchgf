@@ -7,7 +7,7 @@ npm ci
 echo "Building Vite frontend..."
 npm run build
 
-echo "Building and obfuscating server..."
-node scripts/obfuscate.js
+echo "Building server..."
+npm run build:server
 
 echo "Build complete!"
