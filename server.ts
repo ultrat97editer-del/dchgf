@@ -298,6 +298,30 @@ app.post('/api/create-payment-link', async (req, res) => {
                 status: payosError.status
             });
 
+            // Handle duplicate order (code 231) - order already created
+            if (payosError.code === '231' || payosError.message?.includes('231')) {
+                console.log('⚠️ Order already exists, returning stored order');
+                // Store order as processed
+                paymentOrders.set(orderCode, {
+                    orderCode,
+                    amount,
+                    status: 'pending',
+                    createdAt: Date.now()
+                });
+                
+                return res.json({
+                    success: true,
+                    data: {
+                        orderCode,
+                        amount,
+                        qrCode: 'duplicate',
+                        checkoutUrl: `https://pay.payos.vn/web/${orderCode}`,
+                        description: description || `Payment for order ${orderCode}`,
+                        message: 'Order already exists in PayOS'
+                    }
+                });
+            }
+
             return res.status(500).json({
                 success: false,
                 error: 'Failed to create payment link: ' + payosError.message
