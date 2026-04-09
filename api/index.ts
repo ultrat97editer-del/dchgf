@@ -372,6 +372,24 @@ app.get('/health', (req: Request, res: Response) => {
   return res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// DEBUG: Check env vars (remove in production)
+app.get('/api/debug-env', (req: Request, res: Response) => {
+  return res.json({
+    PAYOS_CLIENT_ID: process.env.PAYOS_CLIENT_ID ? '✅ SET' : '❌ MISSING',
+    PAYOS_API_KEY: process.env.PAYOS_API_KEY ? '✅ SET' : '❌ MISSING',
+    PAYOS_CHECKSUM_KEY: process.env.PAYOS_CHECKSUM_KEY ? '✅ SET' : '❌ MISSING',
+    NODE_ENV: process.env.NODE_ENV,
+    actual: {
+      CLIENT_ID_LENGTH: CLIENT_ID.length,
+      API_KEY_LENGTH: API_KEY.length,
+      CHECKSUM_KEY_LENGTH: CHECKSUM_KEY.length,
+      CLIENT_ID_PREVIEW: CLIENT_ID.substring(0, 8) + '...',
+      API_KEY_PREVIEW: API_KEY.substring(0, 8) + '...',
+      CHECKSUM_KEY_PREVIEW: CHECKSUM_KEY.substring(0, 8) + '...'
+    }
+  });
+});
+
 // Root endpoint for testing
 app.get('/', (req: Request, res: Response) => {
   return res.json({ 
