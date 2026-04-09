@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 const PAYOS_CLIENT_ID = '149c8535-25c6-4a91-95f9-768b578c2322';
 const PAYOS_API_KEY = 'b1bf5762-2343-4add-9b91-f9c7afe406c5';
 const PAYOS_CHECKSUM_KEY = '060202ee2764234ad50cd43a852e631216462edcbb6ced388c67f9d0f325ac43';
-const PAYOS_API_URL = 'https://api.payos.vn/v1';
+const PAYOS_API_URL = 'https://api-merchant.payos.vn/v2';
 
 app.use(cors());
 app.use(express.json());
@@ -253,6 +253,7 @@ app.post('/api/create-payment-link', async (req, res) => {
         }
 
         console.log('📝 Creating payment link for order:', orderCode, 'amount:', amount);
+        console.log('📤 Calling PayOS API endpoint:', `${PAYOS_API_URL}/payment-requests`);
 
         // Prepare data for PayOS
         const paymentData = {
@@ -278,11 +279,31 @@ app.post('/api/create-payment-link', async (req, res) => {
 
         try {
             // Call PayOS API directly from Render
-            const response = await axios.post(`${PAYOS_API_URL}/Payment/Create`, paymentData, {
+            // Create signature for the request
+            const signatureData = {
+                amount: paymentData.amount,
+                cancelUrl: paymentData.cancelUrl,
+                description: paymentData.description,
+                orderCode: paymentData.orderCode,
+                returnUrl: paymentData.returnUrl
+            };
+            const signatureKeys = Object.keys(signatureData).sort();
+            let signatureStr = '';
+            for (const key of signatureKeys) {
+                if (signatureData[key as keyof typeof signatureData]) {
+                    signatureStr += `${key}=${signatureData[key as keyof typeof signatureData]}&`;
+                }
+            }
+            signatureStr = signatureStr.slice(0, -1);
+            const signature = crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(signatureStr).digest('hex');
+
+            console.log('🔐 Request signature:', signature);
+
+            const response = await axios.post(`${PAYOS_API_URL}/payment-requests`, paymentData, {
                 headers: {
                     'Client-Id': PAYOS_CLIENT_ID,
                     'Api-Key': PAYOS_API_KEY,
-                    'Idempotency-Key': `${orderCode}-${Date.now()}`,
+                    'X-Signature': signature,
                     'Content-Type': 'application/json'
                 },
                 timeout: 10000
@@ -320,9 +341,13 @@ app.post('/api/create-payment-link', async (req, res) => {
         } catch (payosError: any) {
             console.error('❌ PayOS API Error:', {
                 message: payosError.message,
+                code: payosError.code,
+                errno: payosError.errno,
+                syscall: payosError.syscall,
+                hostname: payosError.hostname,
                 status: payosError.response?.status,
                 data: payosError.response?.data,
-                code: payosError.code
+                stack: payosError.stack?.split('\n').slice(0, 2).join('\n')
             });
 
             // Fallback: Store order and return dummy QR for testing
@@ -341,7 +366,7 @@ app.post('/api/create-payment-link', async (req, res) => {
                     qrCode: '00020101021238610010A000000727013100069704520117101426040910765960208QRIBFTTA53037045405100005802VN62120808LK' + orderCode + '6304629F',
                     checkoutUrl: `https://pay.payos.vn/web/test-${orderCode}`,
                     description: description || `Payment for order ${orderCode}`,
-                    warning: 'Using test QR code - PayOS API failed'
+                    warning: 'Test QR - Use curl -X POST https://locket.io.vn/api/mark-paid/' + orderCode + ' to mark as PAID'
                 }
             });
         }
