@@ -2,8 +2,7 @@
   "name": "locket-payment-api",
   "version": "1.0.0",
   "description": "Payment API with PayOS integration",
-  "main": "index.ts",
-  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch index.ts",
     "build": "tsc",
