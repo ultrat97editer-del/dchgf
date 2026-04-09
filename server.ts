@@ -374,17 +374,19 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
                 amount: order.amount
             });
         } else {
-            // Order not found locally
+            // Order not found locally - return PENDING to keep polling
             console.log('❌ Order not found in local memory:', orderCode);
-            console.log('⚠️ This could mean:');
-            console.log('   1. Webhook callback hasnt been received yet from PayOS');
-            console.log('   2. Payment order has expired (>30 min old)');
-            console.log('   3. Browser session was refreshed, losing order context');
+            console.log('ℹ️  Likely causes:');
+            console.log('   - Webhook callback hasnt been received yet from PayOS');
+            console.log('   - Payment order has expired (>30 min old)');
+            console.log('   - Render server restarted and memory was cleared');
             
+            // Return PENDING instead of UNKNOWN so frontend keeps polling
             return res.json({ 
-                success: false, 
-                status: 'UNKNOWN',
-                message: 'Order not found - waiting for webhook callback from PayOS'
+                success: true,
+                status: 'PENDING',
+                orderCode: code,
+                message: 'Waiting for payment confirmation from PayOS'
             });
         }
     } catch (error: any) {
