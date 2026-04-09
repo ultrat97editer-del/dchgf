@@ -230,19 +230,19 @@ const PAYMENT_BACKEND_URL = process.env.PAYMENT_BACKEND_URL ||
 
 app.post('/api/create-payment-link', async (req, res) => {
     try {
-        const { orderCode } = req.body;
+        const { orderCode, amount } = req.body;
         
         if (!orderCode) {
             return res.status(400).json({ success: false, error: 'Order code is required' });
         }
 
-        console.log('📤 Proxying payment request to:', PAYMENT_BACKEND_URL);
+        console.log('📤 Proxying payment request to:', PAYMENT_BACKEND_URL, 'with payload:', { orderCode, amount });
         
         try {
-            // Forward request to backend payment server
+            // Forward request to backend payment server - gửi đủ orderCode và amount
             const response = await axios.post(
                 `${PAYMENT_BACKEND_URL}/api/create-payment-link`,
-                { orderCode },
+                { orderCode, amount: amount || 10000 },
                 {
                     headers: {
                         'Content-Type': 'application/json'
@@ -254,10 +254,10 @@ app.post('/api/create-payment-link', async (req, res) => {
             console.log('✅ Payment backend response:', response.data);
 
             // Store order in memory for tracking
-            const amount = response.data.data?.amount || 10000;
+            const finalAmount = response.data.data?.amount || amount || 10000;
             paymentOrders.set(orderCode, {
                 orderCode,
-                amount,
+                amount: finalAmount,
                 status: 'pending',
                 createdAt: Date.now()
             });
