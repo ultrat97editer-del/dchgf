@@ -5,12 +5,16 @@ import * as cheerio from 'cheerio';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { TOKEN_SETS, NEXTDNS_KEY } from './src/server/tokens';
+import crypto from 'crypto';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// In-memory payment orders storage
+const paymentOrders = new Map<number, { orderCode: number; amount: number; status: 'pending' | 'paid'; createdAt: number; }>();
 
 const HEADERS: Record<string, string> = {
     'Host': 'api.revenuecat.com',
@@ -216,6 +220,147 @@ app.post('/api/activate', async (req, res) => {
     } catch (error) {
         console.error("Activate error:", error);
         res.status(500).json({ error: 'Failed to activate' });
+    }
+});
+
+// --- Payment API Endpoints ---
+
+// Helper function to generate Viet QR Code URL
+function generateVietQRCode(orderCode: number, amount: number): string {
+    // Using qr-server.com API for generating QR codes
+    // Format: Payment data can be encoded as text, or use bank transfer data
+    const bankAccount = "1234567890"; // Placeholder bank account
+    const bankCode = "970416"; // Vietcombank code
+    const accountName = "LOCKET";
+    
+    // Create Viet QR standard format (simplified)
+    const qrData = `00020126360014COM.VIETQR0111${bankAccount}0320${bankCode}54061000070363040710${amount}9702680113${orderCode}53037045802VN5913${accountName}6009VIETNAM62{18}000700067E4D0F63049E550`;
+    
+    // Encode for URL
+    const encodedQR = encodeURIComponent(qrData);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedQR}`;
+}
+
+app.post('/api/create-payment-link', async (req, res) => {
+    try {
+        const { orderCode } = req.body;
+        
+        if (!orderCode) {
+            return res.status(400).json({ success: false, error: 'Order code is required' });
+        }
+
+        const amount = 10000; // Fixed amount in VND (can be made dynamic)
+        
+        // Store order in memory
+        paymentOrders.set(orderCode, {
+            orderCode,
+            amount,
+            status: 'pending',
+            createdAt: Date.now()
+        });
+
+        // Generate QR code URL
+        const qrCodeUrl = generateVietQRCode(orderCode, amount);
+
+        res.json({
+            success: true,
+            data: {
+                orderCode,
+                amount,
+                qrCode: qrCodeUrl,
+                qrCodeBase64: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PAYMENT_${orderCode}_${amount}`,
+                // For testing: include a payment link
+                paymentLink: `https://example.com/pay/${orderCode}`,
+                expiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiry
+            }
+        });
+
+        // Clean up old orders (older than 30 minutes)
+        const now = Date.now();
+        for (const [code, order] of paymentOrders.entries()) {
+            if (now - order.createdAt > 30 * 60 * 1000) {
+                paymentOrders.delete(code);
+            }
+        }
+    } catch (error: any) {
+        console.error("Payment creation error:", error);
+        res.status(500).json({ success: false, error: 'Failed to create payment link' });
+    }
+});
+
+app.get('/api/check-order/:orderCode', async (req, res) => {
+    try {
+        const { orderCode } = req.params;
+        const code = parseInt(orderCode);
+
+        const order = paymentOrders.get(code);
+        
+        if (!order) {
+            return res.json({ 
+                success: false, 
+                status: 'NOT_FOUND',
+                message: 'Order not found'
+            });
+        }
+
+        // Check if order has expired (30 minutes)
+        if (Date.now() - order.createdAt > 30 * 60 * 1000) {
+            paymentOrders.delete(code);
+            return res.json({ 
+                success: false, 
+                status: 'EXPIRED',
+                message: 'Order expired'
+            });
+        }
+
+        res.json({
+            success: true,
+            status: order.status === 'paid' ? 'PAID' : 'PENDING',
+            orderCode: code,
+            amount: order.amount
+        });
+
+    } catch (error: any) {
+        console.error("Check order error:", error);
+        res.status(500).json({ success: false, error: 'Failed to check order' });
+    }
+});
+
+// Admin endpoint to manually mark order as paid (for testing)
+app.post('/api/admin/mark-paid/:orderCode', async (req, res) => {
+    try {
+        const { orderCode } = req.params;
+        const code = parseInt(orderCode);
+
+        const order = paymentOrders.get(code);
+        
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order not found' });
+        }
+
+        order.status = 'paid';
+        res.json({ success: true, message: 'Order marked as paid' });
+
+    } catch (error: any) {
+        console.error("Admin mark paid error:", error);
+        res.status(500).json({ success: false, error: 'Failed to mark order as paid' });
+    }
+});
+
+// Admin authentication endpoint
+app.post('/api/admin-auth', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'; // Use env variable or default
+        
+        if (password === adminPassword) {
+            res.json({ success: true, message: 'Admin authenticated' });
+        } else {
+            res.status(401).json({ success: false, error: 'Invalid password' });
+        }
+    } catch (error: any) {
+        console.error("Admin auth error:", error);
+        res.status(500).json({ success: false, error: 'Admin authentication failed' });
     }
 });
 
