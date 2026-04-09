@@ -326,16 +326,45 @@ app.post('/api/webhook/payos', async (req, res) => {
     try {
         const { orderCode, status, amount } = req.body;
         
-        if (status === 'PAID') {
+        console.log('📲 PayOS Webhook received:', { orderCode, status, amount });
+        
+        if (status === 'PAID' || status === 'paid') {
             const order = paymentOrders.get(parseInt(orderCode));
             if (order) {
                 order.status = 'paid';
+                console.log('✅ Order marked as paid:', orderCode);
             }
         }
         
         res.json({ success: true, message: 'Webhook received' });
     } catch (error: any) {
         console.error('Webhook error:', error);
+        res.status(500).json({ success: false, error: 'Webhook processing failed' });
+    }
+});
+
+// Alternative webhook endpoint for backend-locket compatibility
+app.post('/api/payos-webhook', async (req, res) => {
+    try {
+        const { orderCode, status, amount, data } = req.body;
+        
+        console.log('📲 PayOS Webhook (payos-webhook) received:', { orderCode, status, amount });
+        
+        // Handle different response formats from PayOS
+        const realOrderCode = orderCode || data?.orderCode;
+        const realStatus = status || data?.status;
+        
+        if (realOrderCode && (realStatus === 'PAID' || realStatus === 'paid')) {
+            const order = paymentOrders.get(parseInt(realOrderCode));
+            if (order) {
+                order.status = 'paid';
+                console.log('✅ Order marked as paid via payos-webhook:', realOrderCode);
+            }
+        }
+        
+        res.json({ success: true, message: 'Webhook processed' });
+    } catch (error: any) {
+        console.error('PayOS webhook error:', error);
         res.status(500).json({ success: false, error: 'Webhook processing failed' });
     }
 });
