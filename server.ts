@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { TOKEN_SETS, NEXTDNS_KEY } from './src/server/tokens';
+import crypto from 'crypto';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -222,7 +223,7 @@ app.post('/api/activate', async (req, res) => {
     }
 });
 
-// --- Payment API Endpoints ---
+// --- Payment API Endpoints (PayOS Integration) ---
 
 app.post('/api/create-payment-link', async (req, res) => {
     try {
@@ -232,12 +233,15 @@ app.post('/api/create-payment-link', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Order code is required' });
         }
 
-        const amount = 10000; // Fixed amount in VND (can be made dynamic)
-        const accountNumber = process.env.BANK_ACCOUNT || '1234567890'; // Bank account number
-        const bin = process.env.BANK_BIN || '970416'; // Vietcombank bin code
-        const accountName = 'LOCKET VIP';
-        const description = `Payment_${orderCode}`; // Transaction description
+        const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID || '149c8535-25c6-4a91-95f9-768b578c2322';
+        const PAYOS_API_KEY = process.env.PAYOS_API_KEY || 'b1bf5762-2343-4add-9b91-f9c7afe406c5';
+        const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || '060202ee2764234ad50cd43a852e631216462edcbb6ced388c67f9d0f325ac43';
         
+        const amount = 10000; // 10,000 VND
+        const description = `Locket Gold Activation - Order ${orderCode}`;
+        const returnUrl = `${process.env.VITE_BACKEND_URL || 'http://localhost:3000'}/payment-success`;
+        const cancelUrl = `${process.env.VITE_BACKEND_URL || 'http://localhost:3000'}/payment-cancel`;
+
         // Store order in memory
         paymentOrders.set(orderCode, {
             orderCode,
@@ -246,24 +250,80 @@ app.post('/api/create-payment-link', async (req, res) => {
             createdAt: Date.now()
         });
 
-        // Generate VietQR code via img.vietqr.io
-        const vietqrUrl = `https://img.vietqr.io/image/${bin}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
+        // Create PayOS payment request
+        const paymentData = {
+            orderCode: orderCode.toString(),
+            amount: amount,
+            description: description,
+            buyerName: 'Locket User',
+            buyerEmail: 'user@locket.vn',
+            buyerPhone: '0000000000',
+            buyerAddress: 'Vietnam',
+            items: [
+                {
+                    name: 'Locket Gold 1 Month',
+                    quantity: 1,
+                    price: amount
+                }
+            ],
+            expiredAt: Math.floor((Date.now() + 15 * 60 * 1000) / 1000), // 15 minutes expiry
+            returnUrl: returnUrl,
+            cancelUrl: cancelUrl,
+            signature: generatePayOSSignature(orderCode, amount, description, PAYOS_CHECKSUM_KEY)
+        };
 
-        res.json({
-            success: true,
-            data: {
-                orderCode,
-                amount,
-                bin,
-                accountNumber,
-                accountName,
-                description,
-                qrCode: vietqrUrl,
-                expiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiry
+        try {
+            // Call PayOS API to create payment link
+            const payosResponse = await axios.post(
+                'https://api-merchant.payos.vn/api/payment-requests',
+                paymentData,
+                {
+                    headers: {
+                        'x-client-id': PAYOS_CLIENT_ID,
+                        'x-api-key': PAYOS_API_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (payosResponse.data.success) {
+                return res.json({
+                    success: true,
+                    data: {
+                        orderCode: orderCode,
+                        amount: amount,
+                        qrCode: payosResponse.data.data.qrCode,
+                        checkoutUrl: payosResponse.data.data.checkoutUrl,
+                        paymentLink: payosResponse.data.data.paymentLink || payosResponse.data.data.checkoutUrl,
+                        expiresAt: Date.now() + 15 * 60 * 1000
+                    }
+                });
+            } else {
+                throw new Error(payosResponse.data.message || 'PayOS API error');
             }
-        });
+        } catch (payosError: any) {
+            console.error('PayOS API Error:', payosError.response?.data || payosError.message);
+            
+            // Fallback: Return mock data for development
+            if (process.env.NODE_ENV !== 'production') {
+                return res.json({
+                    success: true,
+                    data: {
+                        orderCode: orderCode,
+                        amount: amount,
+                        qrCode: `https://img.vietqr.io/image/970416-1234567890-compact2.png?amount=${amount}&addInfo=Locket`,
+                        checkoutUrl: `https://checkout.payos.vn/web/${PAYOS_CLIENT_ID}`,
+                        paymentLink: `https://checkout.payos.vn/web/${PAYOS_CLIENT_ID}`,
+                        expiresAt: Date.now() + 15 * 60 * 1000,
+                        isDev: true
+                    }
+                });
+            }
+            
+            throw payosError;
+        }
 
-        // Clean up old orders (older than 30 minutes)
+        // Clean up old orders
         const now = Date.now();
         for (const [code, order] of paymentOrders.entries()) {
             if (now - order.createdAt > 30 * 60 * 1000) {
@@ -271,8 +331,11 @@ app.post('/api/create-payment-link', async (req, res) => {
             }
         }
     } catch (error: any) {
-        console.error("Payment creation error:", error);
-        res.status(500).json({ success: false, error: 'Failed to create payment link' });
+        console.error('Payment creation error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.response?.data?.message || 'Failed to create payment link' 
+        });
     }
 });
 
@@ -291,7 +354,7 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
             });
         }
 
-        // Check if order has expired (30 minutes)
+        // Check if order has expired
         if (Date.now() - order.createdAt > 30 * 60 * 1000) {
             paymentOrders.delete(code);
             return res.json({ 
@@ -309,12 +372,38 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
         });
 
     } catch (error: any) {
-        console.error("Check order error:", error);
+        console.error('Check order error:', error);
         res.status(500).json({ success: false, error: 'Failed to check order' });
     }
 });
 
-// Admin endpoint to manually mark order as paid (for testing)
+app.post('/api/webhook/payos', async (req, res) => {
+    try {
+        const { orderCode, status, amount } = req.body;
+        
+        if (status === 'PAID') {
+            const order = paymentOrders.get(parseInt(orderCode));
+            if (order) {
+                order.status = 'paid';
+            }
+        }
+        
+        res.json({ success: true, message: 'Webhook received' });
+    } catch (error: any) {
+        console.error('Webhook error:', error);
+        res.status(500).json({ success: false, error: 'Webhook processing failed' });
+    }
+});
+
+// Helper function to generate PayOS signature
+function generatePayOSSignature(orderCode: number, amount: number, description: string, checksumKey: string): string {
+    const data = `${orderCode}${amount}${description}`;
+    return crypto
+        .createHmac('sha256', checksumKey)
+        .update(data)
+        .digest('hex');
+}
+
 app.post('/api/admin/mark-paid/:orderCode', async (req, res) => {
     try {
         const { orderCode } = req.params;

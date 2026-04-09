@@ -693,36 +693,49 @@ export default function App() {
                           {paymentStep === 'transfer' && paymentData && !isAdmin && (
                             <div className="mt-4 p-4 bg-white border border-yellow-200 rounded-xl shadow-inner animate-in fade-in zoom-in-95 duration-300">
                               <div className="text-center mb-4">
-                                <h4 className="font-bold text-gray-800 text-sm mb-1">Quét mã VietQR để thanh toán</h4>
+                                <h4 className="font-bold text-gray-800 text-sm mb-1">Quét mã PayOS để thanh toán</h4>
                                 <p className="text-[10px] text-gray-500 italic">Hệ thống tự động duyệt sau khi nhận tiền</p>
                               </div>
                               
                               <div className="flex justify-center mb-4 relative">
                                 <img 
-                                  src={`https://img.vietqr.io/image/${paymentData.bin}-${paymentData.accountNumber}-compact2.png?amount=${paymentData.amount}&addInfo=${encodeURIComponent(paymentData.description)}&accountName=${encodeURIComponent(paymentData.accountName)}`} 
-                                  alt="VietQR" 
+                                  src={paymentData.qrCode} 
+                                  alt="PayOS QR Code" 
                                   className="w-48 h-48 object-contain rounded-lg border border-gray-100 p-1 bg-white"
                                   referrerPolicy="no-referrer"
                                 />
                                 <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-neutral-900 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                                  <Zap size={10} fill="currentColor" /> Tự động
+                                  <Zap size={10} fill="currentColor" /> PayOS
                                 </div>
                               </div>
 
                               <div className="space-y-2 text-[11px] bg-gray-50 p-3 rounded-lg border border-gray-100">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-500">Số tài khoản:</span>
-                                  <span className="font-bold text-blue-600">{paymentData.accountNumber}</span>
+                                  <span className="text-gray-500">Mã đơn hàng:</span>
+                                  <span className="font-bold text-blue-600">{paymentData.orderCode}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-500">Số tiền:</span>
                                   <span className="font-bold text-red-600">{paymentData.amount.toLocaleString('vi-VN')}đ</span>
                                 </div>
                                 <div className="flex justify-between border-t border-gray-200 pt-1 mt-1">
-                                  <span className="text-gray-500">Nội dung:</span>
-                                  <span className="font-bold text-yellow-600">{paymentData.description}</span>
+                                  <span className="text-gray-500">Nhà cung cấp:</span>
+                                  <span className="font-bold text-yellow-600">PayOS</span>
                                 </div>
                               </div>
+
+                              {paymentData.checkoutUrl && (
+                                <div className="mt-3">
+                                  <a 
+                                    href={paymentData.checkoutUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                  >
+                                    <ArrowRight size={14} /> Thanh toán trên PayOS
+                                  </a>
+                                </div>
+                              )}
 
                               <div className="mt-3 flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
                                 <Loader2 size={14} className="text-blue-500 animate-spin shrink-0" />
