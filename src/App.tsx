@@ -137,8 +137,9 @@ export default function App() {
     const newOrderCode = Math.floor(100000 + Math.random() * 900000);
 
     try {
-      // Truyền đủ orderCode và amount
-      const response = await axios.post(`${BACKEND_URL}/api/create-payment-link`, { orderCode: newOrderCode, amount: 10000 });
+      const payload = { orderCode: newOrderCode, amount: 10000 };
+      console.log('[DEBUG] Payload gửi lên create-payment-link:', payload);
+      const response = await axios.post(`${BACKEND_URL}/api/create-payment-link`, payload);
       if (response.data.success) {
         setPaymentData(response.data.data);
         setPaymentStep('transfer');
@@ -146,7 +147,7 @@ export default function App() {
         Swal.fire('Lỗi', 'Lỗi tạo mã QR. Vui lòng thử lại sau!', 'error');
       }
     } catch (err) {
-      console.error(err);
+      console.error('[DEBUG] Lỗi gọi API:', err);
       Swal.fire('Lỗi', 'Không kết nối được Server thanh toán.', 'error');
     } finally {
       setLoading(false);
