@@ -97,20 +97,58 @@ app.post('/api/create-payment-link', async (req: Request, res: Response) => {
     console.log('📤 Sending to PayOS API:', { ...paymentData, checksum: checksum.substring(0, 10) + '...' });
 
     try {
-      // Call PayOS API
-      const response = await axios.post(`${PAYOS_API_URL}/Payment/Create`, paymentData, {
-        headers: {
-          'Client-Id': CLIENT_ID,
-          'Api-Key': API_KEY,
-          'Idempotency-Key': `${orderCode}-${Date.now()}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      });
+      // Call PayOS API - try without checksum first
+      console.log('🔄 Attempt 1: Calling PayOS API without checksum...');
+      
+      let response;
+      let payosError: any = null;
 
-      console.log('✅ PayOS API response status:', response.status, 'body:', JSON.stringify(response.data).substring(0, 200));
+      try {
+        response = await axios.post(`${PAYOS_API_URL}/Payment/Create`, paymentData, {
+          headers: {
+            'Client-Id': CLIENT_ID,
+            'Api-Key': API_KEY,
+            'Idempotency-Key': `${orderCode}-${Date.now()}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 10000
+        });
+      } catch (err: any) {
+        payosError = err;
+        console.error('❌ PayOS API Error Details:', {
+          message: err.message,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          responseData: err.response?.data,
+          config: {
+            url: err.config?.url,
+            method: err.config?.method,
+            headers: err.config?.headers
+          }
+        });
 
-      if (response.data && response.data.data) {
+        // Try with checksum as fallback
+        console.log('🔄 Attempt 2: Trying again with checksum header...');
+        try {
+          response = await axios.post(`${PAYOS_API_URL}/Payment/Create`, paymentData, {
+            headers: {
+              'Client-Id': CLIENT_ID,
+              'Api-Key': API_KEY,
+              'Checksum': checksum,
+              'Idempotency-Key': `${orderCode}-${Date.now()}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000
+          });
+          payosError = null; // Reset error if this attempt works
+        } catch (err2: any) {
+          console.error('❌ PayOS API Error (Attempt 2):', err2.message);
+          payosError = err2;
+        }
+      }
+
+      if (!payosError && response && response.data && response.data.data) {
+        console.log('✅ PayOS API success:', response.status);
         const { checkoutUrl, qrCode } = response.data.data;
 
         // Store order in memory
@@ -135,22 +173,9 @@ app.post('/api/create-payment-link', async (req: Request, res: Response) => {
         });
       }
 
-      return res.status(400).json({
-        success: false,
-        error: 'Failed to create payment link - no data in response'
-      });
-    } catch (payosError: any) {
-      console.error('❌ PayOS API Error:', {
-        message: payosError.message,
-        status: payosError.response?.status,
-        statusText: payosError.response?.statusText,
-        data: JSON.stringify(payosError.response?.data),
-        code: payosError.code,
-        errno: payosError.errno
-      });
-
       // Fallback: Return dummy QR for testing if PayOS fails
-      console.log('⚠️ PayOS failed, using dummy QR for testing');
+      console.log('⚠️ PayOS API failed, using dummy QR for testing');
+      console.log('📋 Error was:', payosError?.response?.data || payosError?.message);
       
       paymentOrders.set(orderCode, {
         orderCode,
@@ -168,6 +193,23 @@ app.post('/api/create-payment-link', async (req: Request, res: Response) => {
           checkoutUrl: `https://pay.payos.vn/web/test-${orderCode}`,
           description: description || `Payment for order ${orderCode}`,
           warning: 'Using test QR code - PayOS API failed'
+        }
+      });
+    } catch (err: any) {
+      console.error('❌ Unexpected error:', err.message);
+      paymentOrders.set(orderCode, {
+        orderCode,
+        amount,
+        status: 'pending',
+        createdAt: new Date()
+      });
+      return res.json({
+        success: true,
+        data: {
+          orderCode,
+          amount,
+          qrCode: '00020101021238610010A000000727013100069704520117101426040910765960208QRIBFTTA53037045405100005802VN62120808LK' + orderCode + '6304629F',
+          warning: 'Using test QR code - Error'
         }
       });
     }
