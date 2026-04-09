@@ -337,13 +337,19 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
     try {
         const { orderCode } = req.params;
         const code = parseInt(orderCode);
+        
+        console.log(`\n🔍 [check-order] Looking up orderCode: ${code}`);
+        console.log(`📊 Current orders in memory:`, Array.from(paymentOrders.entries()));
 
         const order = paymentOrders.get(code);
+        
+        console.log(`📝 Found order:`, order);
         
         if (order) {
             // Order found in local memory
             if (Date.now() - order.createdAt > 30 * 60 * 1000) {
                 paymentOrders.delete(code);
+                console.log('⏰ Order expired');
                 return res.json({ 
                     success: false, 
                     status: 'EXPIRED',
@@ -351,9 +357,12 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
                 });
             }
 
+            const status = order.status === 'paid' ? 'PAID' : 'PENDING';
+            console.log(`✅ Returning status: ${status}`);
+            
             res.json({
                 success: true,
-                status: order.status === 'paid' ? 'PAID' : 'PENDING',
+                status: status,
                 orderCode: code,
                 amount: order.amount
             });
@@ -460,26 +469,32 @@ app.post('/api/webhook/payos', async (req, res) => {
 // Main webhook endpoint (PayOS calls /api/webhook)
 app.post('/api/webhook', async (req, res) => {
     try {
-        console.log('📲 [/api/webhook] Raw webhook body:', JSON.stringify(req.body));
+        console.log('\n🔔 ============ WEBHOOK RECEIVED ============');
+        console.log('📲 [/api/webhook] Raw webhook body:', JSON.stringify(req.body, null, 2));
+        console.log('📲 [/api/webhook] Headers:', JSON.stringify(req.headers, null, 2));
         
         const { code, success, data } = req.body;
+        
+        console.log('📲 Extracted:', { code, success, data });
         
         // PayOS format: success flag or code '00' means success
         if (success === true || code === '00' || code === 0) {
             const realOrderCode = data?.orderCode;
             const realStatus = data?.status?.toString().toUpperCase();
             
-            console.log('📲 [/api/webhook] Parsed:', { realOrderCode, realStatus });
+            console.log('✅ PayOS Success! Parsed:', { realOrderCode, realStatus });
             
             // Mark order as PAID
             if (realOrderCode && (realStatus === 'PAID' || realStatus === 'SUCCESS' || realStatus === 'COMPLETED')) {
                 const orderCode = parseInt(realOrderCode);
                 const order = paymentOrders.get(orderCode);
+                console.log(`🔍 Looking for order ${orderCode} in memory:`, order);
+                
                 if (order) {
                     order.status = 'paid';
                     console.log('✅ [/api/webhook] Order marked as PAID:', realOrderCode);
                 } else {
-                    console.warn('⚠️ [/api/webhook] Order not found in memory:', realOrderCode);
+                    console.warn('⚠️ [/api/webhook] Order not found in memory, creating new entry');
                     // Still mark it as processed for webhook callback
                     paymentOrders.set(orderCode, {
                         orderCode,
@@ -487,10 +502,15 @@ app.post('/api/webhook', async (req, res) => {
                         status: 'paid',
                         createdAt: Date.now()
                     });
+                    console.log('✅ Created new order entry as PAID:', orderCode);
                 }
+                console.log('📊 All orders in memory:', Array.from(paymentOrders.entries()));
             }
+        } else {
+            console.log('⚠️ Webhook received but status was not success. Code:', code, 'Success:', success);
         }
         
+        console.log('✅ Webhook response sent\n🔔 ============ END WEBHOOK ============\n');
         return res.json({ success: true, message: 'Webhook processed' });
     } catch (error: any) {
         console.error('❌ [/api/webhook] Error:', error);
