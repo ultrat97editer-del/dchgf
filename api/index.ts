@@ -24,6 +24,14 @@ const CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || '060202ee2764234ad50cd43a
 // PayOS API Base URL
 const PAYOS_API_URL = 'https://api.payos.vn/v1';
 
+console.log('🔐 STARTUP: PayOS Configuration loaded:');
+console.log('   CLIENT_ID:', CLIENT_ID ? (CLIENT_ID.substring(0, 8) + '... (length: ' + CLIENT_ID.length + ')') : 'MISSING');
+console.log('   API_KEY:', API_KEY ? (API_KEY.substring(0, 8) + '... (length: ' + API_KEY.length + ')') : 'MISSING');
+console.log('   CHECKSUM_KEY:', CHECKSUM_KEY ? (CHECKSUM_KEY.substring(0, 8) + '... (length: ' + CHECKSUM_KEY.length + ')') : 'MISSING');
+console.log('   API_URL:', PAYOS_API_URL);
+console.log('   NODE_ENV:', process.env.NODE_ENV);
+console.log('   All env vars:', Object.keys(process.env).filter(k => k.includes('PAYOS')));
+
 // In-memory payment order storage
 const paymentOrders = new Map<number, {
   orderCode: number;
