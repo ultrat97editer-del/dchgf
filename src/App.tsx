@@ -137,7 +137,8 @@ export default function App() {
     const newOrderCode = Math.floor(100000 + Math.random() * 900000);
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/api/create-payment-link`, { orderCode: newOrderCode });
+      // Truyền đủ orderCode và amount
+      const response = await axios.post(`${BACKEND_URL}/api/create-payment-link`, { orderCode: newOrderCode, amount: 10000 });
       if (response.data.success) {
         setPaymentData(response.data.data);
         setPaymentStep('transfer');
