@@ -224,7 +224,9 @@ app.post('/api/activate', async (req, res) => {
 
 // --- Payment API Endpoints (Proxy to Backend Server) ---
 
-const PAYMENT_BACKEND_URL = process.env.PAYMENT_BACKEND_URL || 'https://backend-locket.vercel.app';
+// API Server: runs on port 3001 locally, or deployed to Vercel/other platform
+const PAYMENT_BACKEND_URL = process.env.PAYMENT_BACKEND_URL || 
+    (process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : 'https://backend-locket.vercel.app');
 
 app.post('/api/create-payment-link', async (req, res) => {
     try {
@@ -324,48 +326,68 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
 
 app.post('/api/webhook/payos', async (req, res) => {
     try {
-        const { orderCode, status, amount } = req.body;
+        console.log('📲 Raw webhook body:', JSON.stringify(req.body));
         
-        console.log('📲 PayOS Webhook received:', { orderCode, status, amount });
+        const { orderCode, status, amount, data } = req.body;
         
-        if (status === 'PAID' || status === 'paid') {
-            const order = paymentOrders.get(parseInt(orderCode));
+        // Extract order code từ nhiều format khác nhau
+        const realOrderCode = orderCode || data?.orderCode || req.body.order?.code;
+        const realStatus = (status || data?.status)?.toString().toUpperCase();
+        
+        console.log('📲 Parsed webhook:', { realOrderCode, realStatus, amount });
+        
+        // Kiểm tra status PAID
+        if (realOrderCode && (realStatus === 'PAID' || realStatus === 'SUCCESS' || realStatus === 'COMPLETED')) {
+            const order = paymentOrders.get(parseInt(realOrderCode));
             if (order) {
                 order.status = 'paid';
-                console.log('✅ Order marked as paid:', orderCode);
+                console.log('✅ Order marked as paid:', realOrderCode);
+            } else {
+                console.warn('⚠️ Order not found in memory:', realOrderCode);
             }
         }
         
-        res.json({ success: true, message: 'Webhook received' });
+        return res.json({ success: true, message: 'Webhook processed' });
     } catch (error: any) {
-        console.error('Webhook error:', error);
-        res.status(500).json({ success: false, error: 'Webhook processing failed' });
+        console.error('❌ Webhook error:', error);
+        return res.status(500).json({ success: false, error: 'Webhook processing failed' });
     }
 });
 
 // Alternative webhook endpoint for backend-locket compatibility
 app.post('/api/payos-webhook', async (req, res) => {
     try {
-        const { orderCode, status, amount, data } = req.body;
+        console.log('📲 Raw payos-webhook body:', JSON.stringify(req.body));
         
-        console.log('📲 PayOS Webhook (payos-webhook) received:', { orderCode, status, amount });
+        const { orderCode, status, amount, data, code, message } = req.body;
         
-        // Handle different response formats from PayOS
-        const realOrderCode = orderCode || data?.orderCode;
-        const realStatus = status || data?.status;
+        // Extract order code from múltiple formats
+        const realOrderCode = orderCode || data?.orderCode || req.body.order?.code;
+        const realStatus = (status || data?.status || code)?.toString().toUpperCase();
         
-        if (realOrderCode && (realStatus === 'PAID' || realStatus === 'paid')) {
+        console.log('📲 Parsed payos-webhook:', { realOrderCode, realStatus, amount });
+        
+        // Handle different success indicators
+        const isSuccess = realStatus === 'PAID' || 
+                         realStatus === 'SUCCESS' || 
+                         realStatus === 'COMPLETED' ||
+                         code === '00' ||
+                         message?.includes('thành công');
+        
+        if (realOrderCode && isSuccess) {
             const order = paymentOrders.get(parseInt(realOrderCode));
             if (order) {
                 order.status = 'paid';
                 console.log('✅ Order marked as paid via payos-webhook:', realOrderCode);
+            } else {
+                console.warn('⚠️ Order not found in memory:', realOrderCode);
             }
         }
         
-        res.json({ success: true, message: 'Webhook processed' });
+        return res.json({ success: true, message: 'Webhook processed' });
     } catch (error: any) {
-        console.error('PayOS webhook error:', error);
-        res.status(500).json({ success: false, error: 'Webhook processing failed' });
+        console.error('❌ PayOS webhook error:', error);
+        return res.status(500).json({ success: false, error: 'Webhook processing failed' });
     }
 });
 

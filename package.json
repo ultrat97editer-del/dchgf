@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
+    "dev:api": "cd api && npm install && npm run dev",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:api\"",
     "build": "vite build && npm run build:server",
     "build:server": "esbuild server.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/server.js --external:express --external:cors --external:axios --external:cheerio --external:vite --external:path --external:fs",
     "start": "node dist/server.js",
@@ -31,6 +33,7 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",

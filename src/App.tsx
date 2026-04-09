@@ -155,31 +155,41 @@ export default function App() {
   React.useEffect(() => {
     if (paymentStep !== 'transfer' || !paymentData?.orderCode) return;
 
+    console.log('💳 Starting payment polling for order:', paymentData.orderCode);
+
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/check-order/${paymentData.orderCode}`);
+        const checkUrl = `${BACKEND_URL}/api/check-order/${paymentData.orderCode}`;
+        console.log('🔍 Checking order status:', checkUrl);
+        
+        const res = await fetch(checkUrl);
         const data = await res.json();
         
-        if (data.success && data.status === 'PAID') {
+        console.log('📊 Order status response:', data);
+        
+        if (data.success && (data.status === 'PAID' || data.status === 'paid')) {
           clearInterval(interval);
+          console.log('✅ Payment detected! Status:', data.status);
           setPaymentStep('paid');
           
           // Save invoice to Firebase
           try {
+            console.log('💾 Saving invoice to Firebase...');
             await addDoc(collection(db, 'invoices'), {
               username: username.trim(),
               purchaseDate: new Date().toISOString(),
               transactionId: paymentData.orderCode.toString(),
               amount: paymentData.amount || 10000
             });
+            console.log('✅ Invoice saved to Firebase');
           } catch (err) {
-            console.error("Lỗi lưu hóa đơn:", err);
+            console.error("❌ Lỗi lưu hóa đơn:", err);
           }
 
-          Swal.fire('Thành công', 'Đã nhận được thanh toán! Bạn có thể kích hoạt ngay bây giờ.', 'success');
+          Swal.fire('✅ Thành công', 'Đã nhận được thanh toán! Bạn có thể kích hoạt ngay bây giờ.', 'success');
         }
       } catch (e) {
-        console.log("Đang dò trạng thái thanh toán...");
+        console.log("⏳ Đang dò trạng thái thanh toán...", e);
       }
     }, 3000);
 
