@@ -132,10 +132,16 @@ app.post('/api/create-payment-link', async (req: Request, res: Response) => {
       error: 'Failed to create payment link'
     });
   } catch (error: any) {
-    console.error('❌ Create payment link error:', error.response?.data || error.message);
+    console.error('❌ Create payment link error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n')
+    });
     return res.status(500).json({
       success: false,
-      error: error.response?.data?.message || 'Failed to create payment link'
+      error: error.response?.data?.message || error.message || 'Failed to create payment link',
+      debug: process.env.NODE_ENV !== 'production' ? error.message : undefined
     });
   }
 });
