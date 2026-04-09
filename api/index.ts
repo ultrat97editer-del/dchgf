@@ -4,7 +4,10 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import axios from 'axios';
 
-dotenv.config();
+// Load .env in development only
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,9 +17,9 @@ app.use(cors());
 app.use(express.json());
 
 // PayOS Configuration
-const CLIENT_ID = process.env.PAYOS_CLIENT_ID || '55bfd518-54df-4ee0-9a46-52479e60b8ac';
-const API_KEY = process.env.PAYOS_API_KEY || '70e01ab3-d65f-4299-9b1d-eafa6eb8341b';
-const CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || 'd7e36c73dcd2073925e623e3df43132bd73462a4cbd82dfa7b625ca185d5316e';
+const CLIENT_ID = process.env.PAYOS_CLIENT_ID || '149c8535-25c6-4a91-95f9-768b578c2322';
+const API_KEY = process.env.PAYOS_API_KEY || 'b1bf5762-2343-4add-9b91-f9c7afe406c5';
+const CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || '060202ee2764234ad50cd43a852e631216462edcbb6ced388c67f9d0f325ac43';
 
 // PayOS API Base URL
 const PAYOS_API_URL = 'https://api.payos.vn/v1';
@@ -236,6 +239,21 @@ app.post('/api/webhook', async (req: Request, res: Response) => {
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   return res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Root endpoint for testing
+app.get('/', (req: Request, res: Response) => {
+  return res.json({ 
+    status: 'ok',
+    message: 'Locket Payment API is running',
+    version: '1.0.0',
+    endpoints: [
+      'POST /api/create-payment-link',
+      'GET /api/check-order/:orderCode',
+      'POST /api/webhook',
+      'GET /health'
+    ]
+  });
 });
 
 // 404 handler
