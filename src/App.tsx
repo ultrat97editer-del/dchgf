@@ -138,7 +138,8 @@ export default function App() {
 
     try {
       const payload = { orderCode: newOrderCode, amount: 10000 };
-      console.log('[DEBUG] Payload gửi lên create-payment-link:', payload);
+      console.log('[DEBUG] Payload gửi lên create-payment-link:', JSON.stringify(payload));
+      console.log('[DEBUG] BACKEND_URL:', BACKEND_URL);
       const response = await axios.post(`${BACKEND_URL}/api/create-payment-link`, payload);
       if (response.data.success) {
         setPaymentData(response.data.data);
@@ -148,6 +149,7 @@ export default function App() {
       }
     } catch (err) {
       console.error('[DEBUG] Lỗi gọi API:', err);
+      console.error('[DEBUG] Response data:', (err as any).response?.data);
       Swal.fire('Lỗi', 'Không kết nối được Server thanh toán.', 'error');
     } finally {
       setLoading(false);
