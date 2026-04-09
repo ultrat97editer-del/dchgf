@@ -188,46 +188,47 @@ app.post('/api/webhook', async (req: Request, res: Response) => {
   try {
     console.log('📲 Raw webhook body:', JSON.stringify(req.body));
 
-    const { data, signature } = req.body;
+    // PayOS webhook format:
+    // { code, desc, success, data: {...}, signature }
+    const { code, desc, success, data, signature } = req.body;
 
-    // Verify signature nếu PayOS gửi
+    console.log('📲 Webhook headers:', { code, desc, success, hasData: !!data, hasSignature: !!signature });
+
+    // Verify signature if provided
     if (signature && data) {
       const computedSignature = verifySignature(JSON.stringify(data));
       if (computedSignature !== signature) {
         console.warn('⚠️ Invalid signature');
-        // Continue anyway, không fail
+        // Continue anyway but log warning
       }
     }
 
-    // Extract payment info from webhook
-    const {
-      orderCode,
-      transactionId,
-      status,
-      amount,
-      paymentMethod,
-      paidAt
-    } = data || req.body;
+    // Extract order info from webhook data
+    const orderCode = data?.orderCode;
+    const amount = data?.amount;
+    const reference = data?.reference;
+    const transactionDateTime = data?.transactionDateTime;
 
-    console.log('📲 Parsed webhook:', { orderCode, status, amount });
+    console.log('📲 Parsed webhook data:', { orderCode, amount, reference, isSuccess: success, code });
 
-    // Update order status
-    if (orderCode) {
+    // Check if payment successful
+    // PayOS returns success=true or code='00' for successful payments
+    const isPaymentSuccessful = success === true || code === '00';
+
+    if (isPaymentSuccessful && orderCode) {
       const order = paymentOrders.get(parseInt(orderCode));
       if (order) {
-        // Normalize status
-        const normalizedStatus = status?.toString().toUpperCase();
-        if (normalizedStatus === 'PAID' || normalizedStatus === 'SUCCESS' || normalizedStatus === 'COMPLETED') {
-          order.status = 'paid';
-          order.transactionId = transactionId;
-          console.log('✅ Order marked as PAID:', orderCode);
-        }
+        order.status = 'paid';
+        order.transactionId = reference || `${orderCode}-${Date.now()}`;
+        console.log('✅ Order marked as PAID:', orderCode, 'Reference:', reference);
       } else {
-        console.warn('⚠️ Order not found in memory:', orderCode);
+        console.warn('⚠️ Order not found in memory:', orderCode, '(might be from another instance)');
       }
+    } else {
+      console.warn('⚠️ Payment not successful:', { success, code, orderCode });
     }
 
-    // Acknowledge webhook
+    // Acknowledge webhook with 2XX status
     return res.json({
       success: true,
       message: 'Webhook received and processed',
