@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import * as cheerio from 'cheerio';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
+import { PayOS } from '@payos/node';
 import { TOKEN_SETS, NEXTDNS_KEY } from './src/server/tokens';
 
 const app = express();
@@ -14,7 +15,12 @@ const PORT = process.env.PORT || 3000;
 const PAYOS_CLIENT_ID = '149c8535-25c6-4a91-95f9-768b578c2322';
 const PAYOS_API_KEY = 'b1bf5762-2343-4add-9b91-f9c7afe406c5';
 const PAYOS_CHECKSUM_KEY = '060202ee2764234ad50cd43a852e631216462edcbb6ced388c67f9d0f325ac43';
-const PAYOS_API_URL = 'https://api-merchant.payos.vn/v2';
+
+const payos = new PayOS({
+  clientId: PAYOS_CLIENT_ID,
+  apiKey: PAYOS_API_KEY,
+  checksumKey: PAYOS_CHECKSUM_KEY,
+});
 
 app.use(cors());
 app.use(express.json());
@@ -231,19 +237,6 @@ app.post('/api/activate', async (req, res) => {
 
 // --- Payment API Endpoints (Direct PayOS Integration) ---
 
-// Helper: Create checksum for PayOS request
-function createPayOSChecksum(data: Record<string, any>): string {
-    const keys = Object.keys(data).sort();
-    let dataStr = '';
-    for (const key of keys) {
-        if (data[key]) {
-            dataStr += `${key}=${data[key]}&`;
-        }
-    }
-    dataStr = dataStr.slice(0, -1);
-    return crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(dataStr).digest('hex');
-}
-
 app.post('/api/create-payment-link', async (req, res) => {
     try {
         const { orderCode, amount, description, cancelUrl, returnUrl } = req.body;
@@ -253,104 +246,31 @@ app.post('/api/create-payment-link', async (req, res) => {
         }
 
         console.log('📝 Creating payment link for order:', orderCode, 'amount:', amount);
-        console.log('📤 Calling PayOS API endpoint:', `${PAYOS_API_URL}/payment-requests`);
-
-        // Prepare data for PayOS
-        const paymentData = {
-            orderCode: orderCode,
-            amount: amount,
-            description: description || `Payment for order ${orderCode}`,
-            buyerName: 'Locket User',
-            buyerEmail: 'user@locket.io.vn',
-            buyerPhone: '0123456789',
-            buyerAddress: 'Vietnam',
-            items: [
-                {
-                    name: `Locket Activation - Order ${orderCode}`,
-                    quantity: 1,
-                    price: amount
-                }
-            ],
-            cancelUrl: cancelUrl || 'https://locket.io.vn',
-            returnUrl: returnUrl || 'https://locket.io.vn'
-        };
-
-        console.log('📤 Calling PayOS API...');
 
         try {
-            // Call PayOS API directly from Render
-            // Create signature for the request
-            const signatureData = {
-                amount: paymentData.amount,
-                cancelUrl: paymentData.cancelUrl,
-                description: paymentData.description,
-                orderCode: paymentData.orderCode,
-                returnUrl: paymentData.returnUrl
-            };
-            const signatureKeys = Object.keys(signatureData).sort();
-            let signatureStr = '';
-            for (const key of signatureKeys) {
-                if (signatureData[key as keyof typeof signatureData]) {
-                    signatureStr += `${key}=${signatureData[key as keyof typeof signatureData]}&`;
-                }
-            }
-            signatureStr = signatureStr.slice(0, -1);
-            const signature = crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(signatureStr).digest('hex');
-
-            console.log('🔐 Request signature:', signature);
-
-            const response = await axios.post(`${PAYOS_API_URL}/payment-requests`, paymentData, {
-                headers: {
-                    'Client-Id': PAYOS_CLIENT_ID,
-                    'Api-Key': PAYOS_API_KEY,
-                    'X-Signature': signature,
-                    'Content-Type': 'application/json'
-                },
-                timeout: 10000
-            });
-
-            console.log('✅ PayOS API success:', response.status);
-
-            if (response.data && response.data.data) {
-                const { checkoutUrl, qrCode } = response.data.data;
-
-                // Store order in memory
-                paymentOrders.set(orderCode, {
-                    orderCode,
-                    amount,
-                    status: 'pending',
-                    createdAt: Date.now()
-                });
-
-                console.log('💾 Order stored:', orderCode);
-
-                return res.json({
-                    success: true,
-                    data: {
-                        orderCode,
-                        amount,
-                        qrCode: qrCode || null,
-                        checkoutUrl: checkoutUrl || null,
-                        description: description || `Payment for order ${orderCode}`
+            // Use PayOS SDK directly (handles all signature/headers internally)
+            const paymentLink = await payos.paymentRequests.create({
+                orderCode: orderCode,
+                amount: amount,
+                description: description || `Payment for order ${orderCode}`,
+                buyerName: 'Locket User',
+                buyerEmail: 'user@locket.io.vn',
+                buyerPhone: '0123456789',
+                buyerAddress: 'Vietnam',
+                items: [
+                    {
+                        name: `Locket Activation - Order ${orderCode}`,
+                        quantity: 1,
+                        price: amount
                     }
-                });
-            }
-
-            // Fallback if no data
-            throw new Error('No data in PayOS response');
-        } catch (payosError: any) {
-            console.error('❌ PayOS API Error:', {
-                message: payosError.message,
-                code: payosError.code,
-                errno: payosError.errno,
-                syscall: payosError.syscall,
-                hostname: payosError.hostname,
-                status: payosError.response?.status,
-                data: payosError.response?.data,
-                stack: payosError.stack?.split('\n').slice(0, 2).join('\n')
+                ],
+                cancelUrl: cancelUrl || 'https://locket.io.vn',
+                returnUrl: returnUrl || 'https://locket.io.vn'
             });
 
-            // Fallback: Store order and return dummy QR for testing
+            console.log('✅ PayOS payment link created successfully!');
+
+            // Store order in memory
             paymentOrders.set(orderCode, {
                 orderCode,
                 amount,
@@ -363,11 +283,24 @@ app.post('/api/create-payment-link', async (req, res) => {
                 data: {
                     orderCode,
                     amount,
-                    qrCode: '00020101021238610010A000000727013100069704520117101426040910765960208QRIBFTTA53037045405100005802VN62120808LK' + orderCode + '6304629F',
-                    checkoutUrl: `https://pay.payos.vn/web/test-${orderCode}`,
-                    description: description || `Payment for order ${orderCode}`,
-                    warning: 'Test QR - Use curl -X POST https://locket.io.vn/api/mark-paid/' + orderCode + ' to mark as PAID'
+                    qrCode: paymentLink.qrCode,
+                    checkoutUrl: paymentLink.checkoutUrl,
+                    accountNumber: paymentLink.accountNumber,
+                    accountName: paymentLink.accountName,
+                    bin: paymentLink.bin,
+                    description: paymentLink.description
                 }
+            });
+        } catch (payosError: any) {
+            console.error('❌ PayOS SDK Error:', {
+                message: payosError.message,
+                code: payosError.code,
+                status: payosError.status
+            });
+
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to create payment link: ' + payosError.message
             });
         }
     } catch (error: any) {
