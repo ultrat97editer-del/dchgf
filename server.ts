@@ -481,36 +481,39 @@ app.post('/api/webhook', async (req, res) => {
         console.log('📲 Extracted:', { code, success, data });
         
         // PayOS format: success flag or code '00' means success
+        // PayOS webhook does NOT have a "status" field - success = payment completed
         if (success === true || code === '00' || code === 0) {
             const realOrderCode = data?.orderCode;
-            const realStatus = data?.status?.toString().toUpperCase();
+            const realAmount = data?.amount;
             
-            console.log('✅ PayOS Success! Parsed:', { realOrderCode, realStatus });
+            console.log('✅ PayOS Payment Success! OrderCode:', realOrderCode, 'Amount:', realAmount);
             
-            // Mark order as PAID
-            if (realOrderCode && (realStatus === 'PAID' || realStatus === 'SUCCESS' || realStatus === 'COMPLETED')) {
+            // Mark order as PAID - PayOS webhook means payment confirmed
+            if (realOrderCode) {
                 const orderCode = parseInt(realOrderCode);
                 const order = paymentOrders.get(orderCode);
-                console.log(`🔍 Looking for order ${orderCode} in memory:`, order);
+                console.log(`🔍 Looking for order ${orderCode} in memory:`, order ? 'FOUND' : 'NOT FOUND');
                 
                 if (order) {
                     order.status = 'paid';
-                    console.log('✅ [/api/webhook] Order marked as PAID:', realOrderCode);
+                    console.log('✅ [/api/webhook] Order MARKED AS PAID:', realOrderCode);
                 } else {
-                    console.warn('⚠️ [/api/webhook] Order not found in memory, creating new entry');
-                    // Still mark it as processed for webhook callback
+                    console.log('⚠️ [/api/webhook] Order not in memory, creating new entry');
+                    // Create new order entry marked as PAID
                     paymentOrders.set(orderCode, {
                         orderCode,
-                        amount: data?.amount,
+                        amount: realAmount,
                         status: 'paid',
                         createdAt: Date.now()
                     });
-                    console.log('✅ Created new order entry as PAID:', orderCode);
+                    console.log('✅ [/api/webhook] Created order as PAID:', orderCode);
                 }
-                console.log('📊 All orders in memory:', Array.from(paymentOrders.entries()));
+                console.log('📊 All orders in memory now:', Array.from(paymentOrders.entries()).length, 'orders');
+            } else {
+                console.warn('⚠️ [/api/webhook] No orderCode in webhook data!');
             }
         } else {
-            console.log('⚠️ Webhook received but status was not success. Code:', code, 'Success:', success);
+            console.log('⚠️ Webhook received but NOT successful. Code:', code, 'Success:', success);
         }
         
         console.log('✅ Webhook response sent\n🔔 ============ END WEBHOOK ============\n');
