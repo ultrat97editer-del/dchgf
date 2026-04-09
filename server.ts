@@ -278,11 +278,8 @@ app.post('/api/create-payment-link', async (req, res) => {
             });
         }
     } catch (error: any) {
-        console.error('❌ Payment request error:', error.message);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to process payment request'
-        });
+        console.error('❌ Create payment request error:', error.message);
+        res.status(500).json({ success: false, error: 'Failed to process payment request' });
     }
 });
 
