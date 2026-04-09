@@ -367,7 +367,7 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
             const status = order.status === 'paid' ? 'PAID' : 'PENDING';
             console.log(`✅ Returning status: ${status}`);
             
-            res.json({
+            return res.json({
                 success: true,
                 status: status,
                 orderCode: code,
