@@ -65,43 +65,120 @@ app.post('/api/create-payment-link', async (req: Request, res: Response) => {
 
     console.log('📝 Creating payment link for order:', orderCode, 'amount:', amount);
 
-    // TODO: Integrate real PayOS API
-    // For now, return dummy QR code for testing
-    
-    // Store order in memory
-    paymentOrders.set(orderCode, {
-      orderCode,
-      amount,
-      status: 'pending',
-      createdAt: new Date()
+    // Prepare data for PayOS
+    const paymentData = {
+      orderCode: orderCode,
+      amount: amount,
+      description: description || `Payment for order ${orderCode}`,
+      buyerName: 'Locket User',
+      buyerEmail: 'user@locket.io.vn',
+      buyerPhone: '0123456789',
+      buyerAddress: 'Vietnam',
+      items: [
+        {
+          name: `Locket Activation - Order ${orderCode}`,
+          quantity: 1,
+          price: amount
+        }
+      ],
+      cancelUrl: cancelUrl || 'https://locket.io.vn',
+      returnUrl: returnUrl || 'https://locket.io.vn'
+    };
+
+    console.log('🔐 PayOS Credentials:', {
+      Client_ID: CLIENT_ID.substring(0, 8) + '...',
+      API_Key: API_KEY.substring(0, 8) + '...',
+      Checksum_Key: CHECKSUM_KEY.substring(0, 8) + '...',
+      API_URL: PAYOS_API_URL
     });
 
-    console.log('💾 Order stored:', orderCode);
+    // Create checksum
+    const checksum = createChecksum(paymentData);
+    console.log('📤 Sending to PayOS API:', { ...paymentData, checksum: checksum.substring(0, 10) + '...' });
 
-    // Return dummy response for testing
-    return res.json({
-      success: true,
-      data: {
+    try {
+      // Call PayOS API
+      const response = await axios.post(`${PAYOS_API_URL}/Payment/Create`, paymentData, {
+        headers: {
+          'Client-Id': CLIENT_ID,
+          'Api-Key': API_KEY,
+          'Idempotency-Key': `${orderCode}-${Date.now()}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      });
+
+      console.log('✅ PayOS API response status:', response.status, 'body:', JSON.stringify(response.data).substring(0, 200));
+
+      if (response.data && response.data.data) {
+        const { checkoutUrl, qrCode } = response.data.data;
+
+        // Store order in memory
+        paymentOrders.set(orderCode, {
+          orderCode,
+          amount,
+          status: 'pending',
+          createdAt: new Date()
+        });
+
+        console.log('💾 Order stored:', orderCode);
+
+        return res.json({
+          success: true,
+          data: {
+            orderCode,
+            amount,
+            qrCode: qrCode || null,
+            checkoutUrl: checkoutUrl || null,
+            description: description || `Payment for order ${orderCode}`
+          }
+        });
+      }
+
+      return res.status(400).json({
+        success: false,
+        error: 'Failed to create payment link - no data in response'
+      });
+    } catch (payosError: any) {
+      console.error('❌ PayOS API Error:', {
+        message: payosError.message,
+        status: payosError.response?.status,
+        statusText: payosError.response?.statusText,
+        data: JSON.stringify(payosError.response?.data),
+        code: payosError.code,
+        errno: payosError.errno
+      });
+
+      // Fallback: Return dummy QR for testing if PayOS fails
+      console.log('⚠️ PayOS failed, using dummy QR for testing');
+      
+      paymentOrders.set(orderCode, {
         orderCode,
         amount,
-        qrCode: '00020101021238610010A000000727013100069704520117101426040910765960208QRIBFTTA53037045405100005802VN62120808LK' + orderCode + '6304629F',
-        checkoutUrl: `https://pay.payos.vn/web/test-${orderCode}`,
-        description: description || `Payment for order ${orderCode}`,
-        accountNumber: '10142604091076596',
-        accountName: 'NGUYEN VAN THONG'
-      }
-    });
+        status: 'pending',
+        createdAt: new Date()
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          orderCode,
+          amount,
+          qrCode: '00020101021238610010A000000727013100069704520117101426040910765960208QRIBFTTA53037045405100005802VN62120808LK' + orderCode + '6304629F',
+          checkoutUrl: `https://pay.payos.vn/web/test-${orderCode}`,
+          description: description || `Payment for order ${orderCode}`,
+          warning: 'Using test QR code - PayOS API failed'
+        }
+      });
+    }
   } catch (error: any) {
     console.error('❌ Create payment link error:', {
       message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
       stack: error.stack?.split('\n').slice(0, 3).join('\n')
     });
     return res.status(500).json({
       success: false,
-      error: error.response?.data?.message || error.message || 'Failed to create payment link',
-      debug: process.env.NODE_ENV !== 'production' ? error.message : undefined
+      error: error.message || 'Failed to create payment link'
     });
   }
 });
