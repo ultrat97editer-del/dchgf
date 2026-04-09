@@ -25,6 +25,13 @@ const payos = new PayOS({
 app.use(cors());
 app.use(express.json());
 
+// Log ALL API requests for debugging
+app.use('/api/', (req, res, next) => {
+  console.log(`\n📨 [API REQUEST] ${req.method} ${req.path}`);
+  console.log('   Body:', JSON.stringify(req.body).substring(0, 200));
+  next();
+});
+
 // In-memory payment orders storage
 const paymentOrders = new Map<number, { orderCode: number; amount: number; status: 'pending' | 'paid'; createdAt: number; }>();
 
@@ -367,22 +374,18 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
                 amount: order.amount
             });
         } else {
-            // Order not found locally, try API server
-            console.log('📡 Order not found locally, checking API server:', orderCode);
-            try {
-                const apiResponse = await axios.get(
-                    `${PAYMENT_BACKEND_URL}/api/check-order/${orderCode}`,
-                    { timeout: 5000 }
-                );
-                console.log('✅ Got status from API server:', apiResponse.data);
-                return res.json(apiResponse.data);
-            } catch (apiError: any) {
-                console.warn('⚠️ Could not reach API server:', apiError.message);
-                return res.json({ 
-                    success: false, 
-                    status: 'UNKNOWN',
-                    message: 'Order not found'
-                });
+            // Order not found locally
+            console.log('❌ Order not found in local memory:', orderCode);
+            console.log('⚠️ This could mean:');
+            console.log('   1. Webhook callback hasnt been received yet from PayOS');
+            console.log('   2. Payment order has expired (>30 min old)');
+            console.log('   3. Browser session was refreshed, losing order context');
+            
+            return res.json({ 
+                success: false, 
+                status: 'UNKNOWN',
+                message: 'Order not found - waiting for webhook callback from PayOS'
+            });
             }
         }
 
