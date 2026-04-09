@@ -386,9 +386,7 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
                 status: 'UNKNOWN',
                 message: 'Order not found - waiting for webhook callback from PayOS'
             });
-            }
         }
-
     } catch (error: any) {
         console.error('Check order error:', error);
         res.status(500).json({ success: false, error: 'Failed to check order' });
