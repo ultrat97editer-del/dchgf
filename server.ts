@@ -5,7 +5,6 @@ import * as cheerio from 'cheerio';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { TOKEN_SETS, NEXTDNS_KEY } from './src/server/tokens';
-import crypto from 'crypto';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -225,22 +224,6 @@ app.post('/api/activate', async (req, res) => {
 
 // --- Payment API Endpoints ---
 
-// Helper function to generate Viet QR Code URL
-function generateVietQRCode(orderCode: number, amount: number): string {
-    // Using qr-server.com API for generating QR codes
-    // Format: Payment data can be encoded as text, or use bank transfer data
-    const bankAccount = "1234567890"; // Placeholder bank account
-    const bankCode = "970416"; // Vietcombank code
-    const accountName = "LOCKET";
-    
-    // Create Viet QR standard format (simplified)
-    const qrData = `00020126360014COM.VIETQR0111${bankAccount}0320${bankCode}54061000070363040710${amount}9702680113${orderCode}53037045802VN5913${accountName}6009VIETNAM62{18}000700067E4D0F63049E550`;
-    
-    // Encode for URL
-    const encodedQR = encodeURIComponent(qrData);
-    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodedQR}`;
-}
-
 app.post('/api/create-payment-link', async (req, res) => {
     try {
         const { orderCode } = req.body;
@@ -250,6 +233,10 @@ app.post('/api/create-payment-link', async (req, res) => {
         }
 
         const amount = 10000; // Fixed amount in VND (can be made dynamic)
+        const accountNumber = process.env.BANK_ACCOUNT || '1234567890'; // Bank account number
+        const bin = process.env.BANK_BIN || '970416'; // Vietcombank bin code
+        const accountName = 'LOCKET VIP';
+        const description = `Payment_${orderCode}`; // Transaction description
         
         // Store order in memory
         paymentOrders.set(orderCode, {
@@ -259,18 +246,19 @@ app.post('/api/create-payment-link', async (req, res) => {
             createdAt: Date.now()
         });
 
-        // Generate QR code URL
-        const qrCodeUrl = generateVietQRCode(orderCode, amount);
+        // Generate VietQR code via img.vietqr.io
+        const vietqrUrl = `https://img.vietqr.io/image/${bin}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
 
         res.json({
             success: true,
             data: {
                 orderCode,
                 amount,
-                qrCode: qrCodeUrl,
-                qrCodeBase64: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PAYMENT_${orderCode}_${amount}`,
-                // For testing: include a payment link
-                paymentLink: `https://example.com/pay/${orderCode}`,
+                bin,
+                accountNumber,
+                accountName,
+                description,
+                qrCode: vietqrUrl,
                 expiresAt: Date.now() + 15 * 60 * 1000 // 15 minutes expiry
             }
         });
