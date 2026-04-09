@@ -277,4 +277,12 @@ app.listen(PORT, () => {
   console.log(`   GET  /health`);
 });
 
-export default app;
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log('\n🚀 Local development server started');
+  });
+}
+
+// For Vercel serverless
+module.exports = app;
