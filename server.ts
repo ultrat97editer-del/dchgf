@@ -27,8 +27,8 @@ app.use(express.json());
 
 // Log ALL API requests for debugging
 app.use('/api/', (req, res, next) => {
-  console.log(`\n📨 [API REQUEST] ${req.method} ${req.path}`);
-  console.log('   Body:', JSON.stringify(req.body).substring(0, 200));
+  const bodyStr = req.body ? JSON.stringify(req.body).substring(0, 200) : '(no body)';
+  console.log(`\n📨 [API REQUEST] ${req.method} ${req.path} - ${bodyStr}`);
   next();
 });
 
