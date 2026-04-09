@@ -305,6 +305,12 @@ export default function App() {
   };
 
   const handleActivate = async () => {
+    // ✅ Kiểm tra đã thanh toán chưa (bảo mật)
+    if (!isAdmin && paymentStep !== 'paid') {
+      Swal.fire('Lỗi', 'Bạn chưa thanh toán! Vui lòng hoàn tất thanh toán trước.', 'warning');
+      return;
+    }
+
     if (!statusData?.uid) {
       Swal.fire('Lỗi', 'Vui lòng kiểm tra trạng thái trước khi kích hoạt', 'warning');
       return;
