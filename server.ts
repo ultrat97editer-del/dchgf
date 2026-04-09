@@ -333,6 +333,50 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
     }
 });
 
+// TEST ENDPOINT: Mark order as paid (testing only)
+app.post('/api/mark-paid/:orderCode', async (req, res) => {
+    try {
+        const { orderCode } = req.params;
+        const code = parseInt(orderCode);
+
+        console.log('🧪 TEST: Marking order as paid:', code);
+
+        // Try local memory first
+        const order = paymentOrders.get(code);
+        if (order) {
+            order.status = 'paid';
+            console.log('✅ Updated local order:', code);
+            return res.json({
+                success: true,
+                message: 'Order marked as paid (local)',
+                orderCode: code,
+                status: 'PAID'
+            });
+        }
+
+        // Try API server
+        try {
+            const apiResponse = await axios.post(
+                `${PAYMENT_BACKEND_URL}/api/mark-paid/${orderCode}`,
+                {},
+                { timeout: 5000 }
+            );
+            console.log('✅ API server marked order as paid:', apiResponse.data);
+            return res.json(apiResponse.data);
+        } catch (apiError: any) {
+            console.warn('⚠️ Could not reach API server:', apiError.message);
+            return res.status(404).json({
+                success: false,
+                error: 'Order not found'
+            });
+        }
+
+    } catch (error: any) {
+        console.error('Mark paid error:', error);
+        res.status(500).json({ success: false, error: 'Failed to mark order as paid' });
+    }
+});
+
 app.post('/api/webhook/payos', async (req, res) => {
     try {
         console.log('📲 Raw webhook body:', JSON.stringify(req.body));

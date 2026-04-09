@@ -203,6 +203,43 @@ app.post('/api/webhook', async (req: Request, res: Response) => {
   }
 });
 
+// TEST ENDPOINT: Manually mark order as PAID (for testing payment flow)
+app.post('/api/mark-paid/:orderCode', (req: Request, res: Response) => {
+  try {
+    const orderCode = parseInt(req.params.orderCode);
+    const order = paymentOrders.get(orderCode);
+
+    if (!order) {
+      console.log('⚠️ Order not found:', orderCode);
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
+
+    console.log('✅ TEST: Manually marking order as PAID:', orderCode);
+    order.status = 'paid';
+    order.transactionId = `test-${orderCode}-${Date.now()}`;
+
+    return res.json({
+      success: true,
+      message: 'Order marked as paid (test mode)',
+      order: {
+        orderCode: order.orderCode,
+        amount: order.amount,
+        status: order.status,
+        transactionId: order.transactionId
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Mark paid error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to mark order as paid'
+    });
+  }
+});
+
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   return res.json({ status: 'ok', timestamp: new Date().toISOString() });
