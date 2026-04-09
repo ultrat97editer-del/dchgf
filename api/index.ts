@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import axios from 'axios';
 
-dotenv.config({ path: '../.env.local' });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

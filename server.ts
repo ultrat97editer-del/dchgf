@@ -226,7 +226,7 @@ app.post('/api/activate', async (req, res) => {
 
 // API Server: runs on port 3001 locally, or deployed to Vercel/other platform
 const PAYMENT_BACKEND_URL = process.env.PAYMENT_BACKEND_URL || 
-    (process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : 'https://backend-locket.vercel.app');
+    (process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : 'https://dchgf.vercel.app');
 
 app.post('/api/create-payment-link', async (req, res) => {
     try {
@@ -293,30 +293,42 @@ app.get('/api/check-order/:orderCode', async (req, res) => {
 
         const order = paymentOrders.get(code);
         
-        if (!order) {
-            return res.json({ 
-                success: false, 
-                status: 'NOT_FOUND',
-                message: 'Order not found'
-            });
-        }
+        if (order) {
+            // Order found in local memory
+            if (Date.now() - order.createdAt > 30 * 60 * 1000) {
+                paymentOrders.delete(code);
+                return res.json({ 
+                    success: false, 
+                    status: 'EXPIRED',
+                    message: 'Order expired'
+                });
+            }
 
-        // Check if order has expired
-        if (Date.now() - order.createdAt > 30 * 60 * 1000) {
-            paymentOrders.delete(code);
-            return res.json({ 
-                success: false, 
-                status: 'EXPIRED',
-                message: 'Order expired'
+            res.json({
+                success: true,
+                status: order.status === 'paid' ? 'PAID' : 'PENDING',
+                orderCode: code,
+                amount: order.amount
             });
+        } else {
+            // Order not found locally, try API server
+            console.log('📡 Order not found locally, checking API server:', orderCode);
+            try {
+                const apiResponse = await axios.get(
+                    `${PAYMENT_BACKEND_URL}/api/check-order/${orderCode}`,
+                    { timeout: 5000 }
+                );
+                console.log('✅ Got status from API server:', apiResponse.data);
+                return res.json(apiResponse.data);
+            } catch (apiError: any) {
+                console.warn('⚠️ Could not reach API server:', apiError.message);
+                return res.json({ 
+                    success: false, 
+                    status: 'UNKNOWN',
+                    message: 'Order not found'
+                });
+            }
         }
-
-        res.json({
-            success: true,
-            status: order.status === 'paid' ? 'PAID' : 'PENDING',
-            orderCode: code,
-            amount: order.amount
-        });
 
     } catch (error: any) {
         console.error('Check order error:', error);
