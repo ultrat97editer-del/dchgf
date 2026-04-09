@@ -457,6 +457,47 @@ app.post('/api/webhook/payos', async (req, res) => {
     }
 });
 
+// Main webhook endpoint (PayOS calls /api/webhook)
+app.post('/api/webhook', async (req, res) => {
+    try {
+        console.log('📲 [/api/webhook] Raw webhook body:', JSON.stringify(req.body));
+        
+        const { code, success, data } = req.body;
+        
+        // PayOS format: success flag or code '00' means success
+        if (success === true || code === '00' || code === 0) {
+            const realOrderCode = data?.orderCode;
+            const realStatus = data?.status?.toString().toUpperCase();
+            
+            console.log('📲 [/api/webhook] Parsed:', { realOrderCode, realStatus });
+            
+            // Mark order as PAID
+            if (realOrderCode && (realStatus === 'PAID' || realStatus === 'SUCCESS' || realStatus === 'COMPLETED')) {
+                const orderCode = parseInt(realOrderCode);
+                const order = paymentOrders.get(orderCode);
+                if (order) {
+                    order.status = 'paid';
+                    console.log('✅ [/api/webhook] Order marked as PAID:', realOrderCode);
+                } else {
+                    console.warn('⚠️ [/api/webhook] Order not found in memory:', realOrderCode);
+                    // Still mark it as processed for webhook callback
+                    paymentOrders.set(orderCode, {
+                        orderCode,
+                        amount: data?.amount,
+                        status: 'paid',
+                        createdAt: Date.now()
+                    });
+                }
+            }
+        }
+        
+        return res.json({ success: true, message: 'Webhook processed' });
+    } catch (error: any) {
+        console.error('❌ [/api/webhook] Error:', error);
+        return res.status(500).json({ success: false, error: 'Webhook processing failed' });
+    }
+});
+
 // Alternative webhook endpoint for backend-locket compatibility
 app.post('/api/payos-webhook', async (req, res) => {
     try {
