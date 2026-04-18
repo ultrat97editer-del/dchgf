@@ -357,7 +357,7 @@ export default function App() {
                   referrerPolicy="no-referrer"
                 />
                 <div>
-                  <h2 className="font-bold text-apple-gray-900 leading-tight text-sm">locket.io.vn</h2>
+                  <h2 className="font-bold text-black leading-tight text-sm">locket.io.vn</h2>
                   <p className="text-[10px] text-apple-gray-600 font-medium uppercase tracking-wider">Activator System</p>
                 </div>
               </div>
@@ -366,42 +366,42 @@ export default function App() {
             <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
               <button 
                 onClick={() => { setActiveTab('home'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'home' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'home' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <Rocket size={20} />
                 <span className="text-sm">Trang chủ</span>
               </button>
               <button 
                 onClick={() => { setActiveTab('activate'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'activate' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'activate' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <Zap size={20} />
                 <span className="text-sm">Kích hoạt</span>
               </button>
               <button 
                 onClick={() => { setActiveTab('invoice'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'invoice' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'invoice' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <Receipt size={20} />
                 <span className="text-sm">Hoá đơn</span>
               </button>
               <button 
                 onClick={() => { setActiveTab('security'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'security' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'security' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <Shield size={20} />
                 <span className="text-sm">Bảo mật</span>
               </button>
               <button 
                 onClick={() => { setActiveTab('policy'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'policy' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'policy' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <FileText size={20} />
                 <span className="text-sm">Chính sách</span>
               </button>
               <button 
                 onClick={() => { setActiveTab('contact'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'contact' ? 'bg-blue-50 text-apple-blue font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-apple transition-all duration-200 ${activeTab === 'contact' ? 'bg-yellow-100 text-yellow-700 font-bold' : 'text-apple-gray-600 hover:bg-apple-gray-100'}`}
               >
                 <Mail size={20} />
                 <span className="text-sm">Liên hệ</span>
@@ -410,7 +410,7 @@ export default function App() {
               <a 
                 href="/DNSlocketgold.mobileconfig"
                 download="DNSlocketgold.mobileconfig"
-                className="mt-6 block p-4 rounded-apple-lg bg-apple-blue text-white shadow-apple-md hover:bg-opacity-90 transition-all duration-300 group"
+                className="mt-6 block p-4 rounded-apple-lg bg-yellow-500 text-black shadow-apple-md hover:bg-yellow-600 transition-all duration-300 group"
               >
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
@@ -455,8 +455,8 @@ export default function App() {
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6 animate-in fade-in duration-200">
             <div className="bg-white border border-apple-gray-200 p-6 rounded-apple-lg w-full max-w-sm shadow-apple-lg animate-in zoom-in-95">
               <div className="flex items-center gap-3 mb-2">
-                <Shield className="text-apple-blue" size={28} />
-                <h3 className="text-xl font-bold text-apple-gray-900">Xác thực Admin</h3>
+                <Shield className="text-yellow-600" size={28} />
+                <h3 className="text-xl font-bold text-black">Xác thực Admin</h3>
               </div>
               <p className="text-xs text-apple-gray-600 mb-6">Xác thực an toàn qua máy chủ</p>
               
@@ -467,7 +467,7 @@ export default function App() {
                 onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
                 disabled={adminLoading}
-                className="w-full bg-apple-gray-50 border border-apple-gray-300 rounded-apple px-4 py-3 text-apple-gray-900 mb-4 focus:ring-2 focus:ring-apple-blue/50 outline-none transition-all"
+                className="w-full bg-apple-gray-50 border border-apple-gray-300 rounded-apple px-4 py-3 text-black mb-4 focus:ring-2 focus:ring-yellow-500/50 outline-none transition-all"
               />
               
               <div className="flex gap-3">
@@ -484,7 +484,7 @@ export default function App() {
                 <button
                   onClick={handleAdminLogin}
                   disabled={adminLoading}
-                  className="flex-1 py-3 rounded-apple font-bold text-white bg-apple-blue hover:bg-opacity-90 transition-colors flex justify-center items-center gap-2"
+                  className="flex-1 py-3 rounded-apple font-bold text-black bg-yellow-500 hover:bg-yellow-600 transition-colors flex justify-center items-center gap-2"
                 >
                   {adminLoading ? <Loader2 size={18} className="animate-spin" /> : 'Xác nhận'}
                 </button>
@@ -506,18 +506,18 @@ export default function App() {
             </div>
             <div className="flex items-center gap-6">
               <div className="relative flex items-center gap-2">
-                <button onClick={() => setShowAdminModal(true)} className="relative text-apple-gray-600 hover:text-apple-blue transition p-1 mr-2" title="Admin Login">
+                <button onClick={() => setShowAdminModal(true)} className="relative text-apple-gray-600 hover:text-yellow-600 transition p-1 mr-2" title="Admin Login">
                   <Lock size={18} className={isAdmin ? "text-yellow-500" : ""} />
                 </button>
                 
-                <button onClick={toggleNotifPanel} className="relative text-apple-gray-600 hover:text-apple-blue transition p-1">
+                <button onClick={toggleNotifPanel} className="relative text-apple-gray-600 hover:text-yellow-600 transition p-1">
                   <Bell size={20} />
                 </button>
                 {isNotifOpen && (
                   <div className="absolute right-0 top-10 w-80 bg-white rounded-apple-lg shadow-apple-lg border border-apple-gray-200 z-50 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-apple-gray-100">
-                      <span className="font-bold text-apple-gray-900 text-sm flex items-center gap-2">
-                        <Bell size={16} className="text-apple-blue" /> Thông báo
+                      <span className="font-bold text-black text-sm flex items-center gap-2">
+                        <Bell size={16} className="text-yellow-600" /> Thông báo
                       </span>
                       <button onClick={toggleNotifPanel} className="text-apple-gray-600 hover:text-apple-gray-800 p-1 transition">
                         <X size={14} />
@@ -526,7 +526,7 @@ export default function App() {
                     <div className="max-h-80 overflow-y-auto">
                       <div className="p-4 border-b border-apple-gray-100 bg-blue-50/30">
                         <div className="flex justify-between items-start mb-1">
-                          <span className="font-bold text-xs text-apple-blue uppercase tracking-wider">Lưu ý quan trọng</span>
+                          <span className="font-bold text-xs text-yellow-600 uppercase tracking-wider">Lưu ý quan trọng</span>
                           <span className="text-[10px] text-apple-gray-500">17:05 14/03/2026</span>
                         </div>
                         <p className="text-xs font-bold text-red-600 mb-1">LƯU Ý Không Bật 1.1.1.1 hay VPN</p>
@@ -545,15 +545,15 @@ export default function App() {
             {activeTab === 'home' && (
               <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Nâng Cấp Gold Section as Home Page */}
-                <div className="bg-gradient-to-br from-apple-blue to-blue-800 rounded-[2.5rem] p-8 md:p-12 text-white relative overflow-hidden shadow-apple-lg">
+                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-[2.5rem] p-8 md:p-12 text-black relative overflow-hidden shadow-apple-lg">
                   <div className="relative z-10 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
-                      <Crown size={16} className="text-yellow-400" /> Đặc quyền tối thượng
+                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-black px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+                      <Crown size={16} className="text-yellow-600" /> Đặc quyền tối thượng
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-tight">
-                      Nâng Cấp <span className="text-yellow-400">Locket Gold</span>
+                      Nâng Cấp <span className="text-yellow-600">Locket Gold</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-blue-100 font-medium mb-8 opacity-90 leading-relaxed">
+                    <p className="text-lg md:text-xl text-black font-medium mb-8 opacity-90 leading-relaxed">
                       Trải nghiệm toàn bộ tính năng cao cấp nhất mà không cần iCloud hay Shadowrocket.
                     </p>
                     
@@ -629,7 +629,7 @@ export default function App() {
             {activeTab === 'activate' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="lg:col-span-7 space-y-6">
-                  <div className="bg-gradient-to-r from-apple-blue to-blue-800 rounded-3xl p-8 text-white relative overflow-hidden shadow-apple-lg isolate">
+                  <div className="bg-gradient-to-r from-yellow-500 to-yellow-700 rounded-3xl p-8 text-black relative overflow-hidden shadow-apple-lg isolate">
                     <div className="relative z-10">
                       <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2">Locket Gold Activator</h1>
                       <p className="text-blue-100 font-bold text-sm md:text-base mb-4 opacity-90">
@@ -655,7 +655,7 @@ export default function App() {
                   <div id="activation-card" className="bg-white p-6 rounded-apple-lg shadow-apple-sm border border-apple-gray-200 relative">
                     <div className="flex justify-between mb-6">
                       <h2 className="font-bold flex items-center text-base">
-                        <Zap size={18} className="mr-2 text-apple-blue" /> Kích hoạt Locket Gold tự động
+                        <Zap size={18} className="mr-2 text-yellow-600" /> Kích hoạt Locket Gold tự động
                       </h2>
                     </div>
                     <div className="space-y-4">
@@ -676,8 +676,8 @@ export default function App() {
                       </div>
 
                       {statusData && (
-                        <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-apple-lg">
-                          <h3 className="font-bold text-apple-blue mb-2 flex items-center gap-2">
+                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-apple-lg">
+                          <h3 className="font-bold text-yellow-700 mb-2 flex items-center gap-2">
                             <Search size={16} /> Kết quả kiểm tra
                           </h3>
                           <div className="space-y-2 text-sm">
@@ -1294,7 +1294,7 @@ export default function App() {
 
         <div
           onClick={toggleSupport}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-apple-blue to-blue-400 rounded-full shadow-apple-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform z-50"
+          className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-400 rounded-full shadow-apple-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform z-50"
         >
           {isSupportOpen ? <X size={24} className="text-white" /> : <Headset size={24} className="text-white" />}
         </div>
@@ -1304,7 +1304,7 @@ export default function App() {
             isSupportOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
           }`}
         >
-          <div className="bg-gradient-to-r from-apple-blue to-blue-400 px-5 py-4 text-white relative">
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-400 px-5 py-4 text-black relative">
             <button onClick={toggleSupport} className="absolute top-3 right-3 text-white/70 hover:text-white transition">
               <X size={16} />
             </button>
@@ -1327,17 +1327,17 @@ export default function App() {
                 <span className="text-white font-bold text-sm">Tele</span>
               </div>
               <div className="flex-1">
-                <p className="font-bold text-sm text-apple-gray-900">Telegram</p>
+                <p className="font-bold text-sm text-black">Telegram</p>
                 <p className="text-xs text-apple-gray-600">@T97system</p>
               </div>
               <ArrowRight size={16} className="text-apple-gray-400 group-hover:text-sky-500 transition" />
             </a>
             <a href="https://zalo.me/g/f1zgpr2a3ejmojsfkwyb" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-apple transition group">
               <div className="w-10 h-10 bg-apple-blue rounded-apple flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">Zalo</span>
+                <span className="text-black font-bold text-sm">Zalo</span>
               </div>
               <div className="flex-1">
-                <p className="font-bold text-sm text-apple-gray-900">Nhóm Zalo</p>
+                <p className="font-bold text-sm text-black">Nhóm Zalo</p>
                 <p className="text-xs text-apple-gray-600">Hỗ trợ 24/7</p>
               </div>
               <ArrowRight size={16} className="text-apple-gray-400 group-hover:text-apple-blue transition" />
@@ -1348,8 +1348,8 @@ export default function App() {
         {showAddInvoiceModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-white rounded-apple-lg w-full max-w-md shadow-apple-xl overflow-hidden animate-in zoom-in-95 duration-300">
-              <div className="p-6 border-b border-apple-gray-100 flex justify-between items-center bg-emerald-50">
-                <h3 className="text-lg font-bold text-emerald-800 flex items-center gap-2">
+              <div className="p-6 border-b border-apple-gray-100 flex justify-between items-center bg-yellow-50">
+                <h3 className="text-lg font-bold text-yellow-700 flex items-center gap-2">
                   <Receipt size={20} /> Thêm hoá đơn thủ công
                 </h3>
                 <button onClick={() => setShowAddInvoiceModal(false)} className="text-emerald-400 hover:text-emerald-600 transition">
@@ -1364,7 +1364,7 @@ export default function App() {
                     value={newInvoiceData.username}
                     onChange={(e) => setNewInvoiceData({...newInvoiceData, username: e.target.value})}
                     placeholder="Nhập username..."
-                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all text-sm font-medium text-black"
                   />
                 </div>
                 <div className="space-y-2">
@@ -1374,7 +1374,7 @@ export default function App() {
                     value={newInvoiceData.transactionId}
                     onChange={(e) => setNewInvoiceData({...newInvoiceData, transactionId: e.target.value})}
                     placeholder="Nhập mã giao dịch..."
-                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all text-sm font-medium text-black"
                   />
                 </div>
                 <div className="space-y-2">
@@ -1383,14 +1383,14 @@ export default function App() {
                     type="number" 
                     value={newInvoiceData.amount}
                     onChange={(e) => setNewInvoiceData({...newInvoiceData, amount: e.target.value})}
-                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                    className="w-full px-5 py-4 bg-apple-gray-50 border border-apple-gray-200 rounded-apple-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all text-sm font-medium text-black"
                   />
                 </div>
                 
                 <button 
                   onClick={handleAddManualInvoice}
                   disabled={loading}
-                  className="w-full bg-emerald-600 text-white py-4 rounded-apple-lg font-bold shadow-apple-md hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-yellow-500 text-black py-4 rounded-apple-lg font-bold shadow-apple-md hover:bg-yellow-600 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {loading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle size={20} />}
                   Xác nhận thêm

@@ -17,7 +17,8 @@ export default {
           800: '#555555',
           900: '#1D1D1F',
         },
-        'apple-blue': '#0071E3',
+        'apple-blue': '#FFD700',
+        'apple-amber': '#FFD700',
         'apple-red': '#FF3B30',
         'apple-green': '#34C759',
       },
@@ -26,9 +27,9 @@ export default {
         '2.5': '0.625rem',
       },
       borderRadius: {
-        'apple': '12px',
-        'apple-lg': '16px',
-        'apple-xl': '20px',
+        'apple': '20px',
+        'apple-lg': '24px',
+        'apple-xl': '28px',
       },
       boxShadow: {
         'apple-sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
