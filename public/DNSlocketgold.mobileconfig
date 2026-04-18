@@ -1,62 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-    <key>PayloadContent</key>
-    <array>
-        <dict>
-            <key>DNSSettings</key>
-            <dict>
-                <key>DNSProtocol</key>
-                <string>TLS</string>
-                <key>ServerAddresses</key>
-                <array>
-                    <string>45.90.28.0</string>
-                    <string>45.90.30.0</string>
-                </array>
-                <key>ServerName</key>
-                <string>678bdd.dns.nextdns.io</string>
-            </dict>
-
-            <key>PayloadDisplayName</key>
-            <string>Locket T97</string>
-            <key>PayloadIdentifier</key>
-            <string>com.profile.dns.locket</string>
-            <key>PayloadType</key>
-            <string>com.apple.dnsSettings.managed</string>
-            <key>PayloadUUID</key>
-            <string>11111111-2222-3333-4444-555555555555</string>
-            <key>PayloadVersion</key>
-            <integer>1</integer>
-        </dict>
-    </array>
-
+  <dict>
     <key>PayloadDisplayName</key>
-    <string>LocketGold by T97</string>
-
-    <key>PayloadDescription</key>
-  <string>Locketgold.top:
-- Chặn quảng cáo cho toàn bộ thiết bị bao gồm cả chặn quảng cáo YouTube lên tới 90%.
-- Loại bỏ việc bị theo dõi bởi các trang web.
-- Chặn thu thập thông tin người dùng.
-- Không hao pin vì dữ liệu chỉ chạy qua DNS này thay vì hệ thống.
-- Hỗ trợ iPhone, iPad, iPod, MacOS, tvOS.
-- Hoạt động trên WiFi, 3G, 4G.
-- Nâng cấp LocketGold.
-Support: T97 System | Config by: T97 | Locket.io.vn
-    </string>
-
-    <key>PayloadIdentifier</key>
-    <string>com.profile.system.locket</string>
-    <key>PayloadOrganization</key>
     <string>T97</string>
-    <key>PayloadRemovalDisallowed</key>
-    <false/>
+    <key>PayloadDescription</key>
+    <string>LOCKET.io.vn</string>
+    <key>PayloadIdentifier</key>
+    <string>io.nextdns.8af6bd.profile</string>
+    <key>PayloadScope</key>
+    <string>System</string>
     <key>PayloadType</key>
     <string>Configuration</string>
     <key>PayloadUUID</key>
-    <string>AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE</string>
+    <string>A1E2F262-DB73-40F6-BD22-2E42A43A3C94.8af6bd</string>
     <key>PayloadVersion</key>
     <integer>1</integer>
-</dict>
+    <key>PayloadContent</key>
+    <array>
+      <dict>
+        <key>DNSSettings</key>
+        <dict>
+          <key>DNSProtocol</key>
+          <string>HTTPS</string>
+          <key>ServerURL</key>
+          <string>https://apple.dns.nextdns.io/8af6bd</string>
+        </dict>
+        <key>OnDemandRules</key>
+        <array>
+          <dict>
+            <key>Action</key>
+            <string>EvaluateConnection</string>
+            <key>ActionParameters</key>
+            <array>
+              <dict>
+                <key>DomainAction</key>
+                <string>NeverConnect</string>
+                <key>Domains</key>
+                <array>
+                  <string>captive.apple.com</string>
+                  <string>3gppnetwork.org</string>
+                  <string>dav.orange.fr</string>
+                  <string>vvm.mobistar.be</string>
+                  <string>vvm.mstore.msg.t-mobile.com</string>
+                  <string>tma.vvm.mone.pan-net.eu</string>
+                  <string>vvm.ee.co.uk</string>
+                </array>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>Action</key>
+            <string>Connect</string>
+          </dict>
+        </array>
+        <key>PayloadType</key>
+        <string>com.apple.dnsSettings.managed</string>
+        <key>PayloadIdentifier</key>
+        <string>io.nextdns.8af6bd.profile.dnsSettings.managed</string>
+        <key>PayloadUUID</key>
+        <string>A1E2F262-DB73-40F6-BD22-2E42A43A3C94.8af6bd.dnsSettings.managed</string>
+        <key>PayloadDisplayName</key>
+        <string>T97</string>
+        <key>PayloadOrganization</key>
+        <string>NextDNS</string>
+        <key>PayloadVersion</key>
+        <integer>1</integer>
+      </dict>
+    </array>
+  </dict>
 </plist>
