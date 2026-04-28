@@ -12,9 +12,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // PayOS Configuration
-const PAYOS_CLIENT_ID = '149c8535-25c6-4a91-95f9-768b578c2322';
-const PAYOS_API_KEY = 'b1bf5762-2343-4add-9b91-f9c7afe406c5';
-const PAYOS_CHECKSUM_KEY = '060202ee2764234ad50cd43a852e631216462edcbb6ced388c67f9d0f325ac43';
+const PAYOS_CLIENT_ID = 'fc23ad6f-597d-452e-bbe7-c8e0d52f60cc';
+const PAYOS_API_KEY = 'dc5d00d1-7e92-4c04-8dee-cdce05c815db';
+const PAYOS_CHECKSUM_KEY = 'db72150847118c7c81f06d3cf8db2245d77d69f02a8a38b9807dd7b635a9c4f9';
 
 const payos = new PayOS({
   clientId: PAYOS_CLIENT_ID,
