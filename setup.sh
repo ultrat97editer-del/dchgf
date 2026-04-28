@@ -23,9 +23,9 @@ cd api
 if [ ! -f .env ]; then
     echo "📝 Creating api/.env with PayOS credentials..."
     cat > .env << 'EOF'
-PAYOS_CLIENT_ID=55bfd518-54df-4ee0-9a46-52479e60b8ac
-PAYOS_API_KEY=70e01ab3-d65f-4299-9b1d-eafa6eb8341b
-PAYOS_CHECKSUM_KEY=d7e36c73dcd2073925e623e3df43132bd73462a4cbd82dfa7b625ca185d5316e
+PAYOS_CLIENT_ID=fc23ad6f-597d-452e-bbe7-c8e0d52f60cc
+PAYOS_API_KEY=dc5d00d1-7e92-4c04-8dee-cdce05c815db
+PAYOS_CHECKSUM_KEY=db72150847118c7c81f06d3cf8db2245d77d69f02a8a38b9807dd7b635a9c4f9
 
 PORT=3001
 NODE_ENV=development
